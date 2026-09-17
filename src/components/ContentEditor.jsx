@@ -5,6 +5,7 @@ import ImageUpload from "./ImageUpload";
 import WebsitePreview from "./WebsitePreview";
 import { contentPaths, contentPreviewItem, contentTitles, moduleFields } from "../../shared/content";
 import { labelize } from "../../shared/settings";
+import GalleryEditor from "./GalleryEditor";
 
 const steps = [
   { id: "basic", title: "Basic details", hint: "Name, summary and category" },
@@ -26,6 +27,10 @@ function TextField({ name, value, onChange, disabled, long = false }) {
 }
 
 export default function ContentEditor({ modal, close, done }) {
+  return modal.config.module === 'gallery' ? <GalleryEditor modal={modal} close={close} done={done}/> : <StandardContentEditor modal={modal} close={close} done={done}/>;
+}
+
+function StandardContentEditor({ modal, close, done }) {
   const module = modal.config.module;
   const config = moduleFields[module];
   const readOnly = modal.mode === "view";

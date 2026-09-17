@@ -34,18 +34,20 @@ export async function api(path, options = {}) {
 
 export async function uploadFile(scope, file) {
   tokenStore.hydrate();
+  tokenStore.hydrate();
   const formData = new FormData();
   formData.append("file", file);
   const headers = {};
   const token = tokenStore.get();
   if (token) headers.Authorization = `Bearer ${token}`;
-  const response = await fetch(`${API_BASE_URL}/admin/uploads/${scope}`, {
+  let response;
+  try { response = await fetch(`${API_BASE_URL}/admin/uploads/${scope}`, {
     method: "POST",
     headers,
     body: formData
-  });
+  }); } catch { throw new Error("Unable to reach the upload server. Check your connection and make sure the backend is running."); }
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok || payload.success === false) throw new Error(payload.message || "Upload failed");
+  if (!response.ok || payload.success === false) throw new Error(response.status === 401 ? "Your session has expired. Sign in again before uploading." : payload.message || "Upload failed");
   return payload.data;
 }
 

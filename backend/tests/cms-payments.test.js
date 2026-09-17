@@ -79,6 +79,37 @@ test("uploaded images have a public URL and permit frontend cross-origin display
   assert.equal(image.headers.get("cross-origin-resource-policy"), "cross-origin");
 });
 
+test("gallery uploads and persists more than five titled images, supports replacement and rejects invalid images", async () => {
+  const images = [];
+  for (let index = 0; index < 7; index++) {
+    const form = new FormData();
+    form.append('file', new Blob([Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZQmcAAAAASUVORK5CYII=', 'base64')], {type: 'image/png'}), `moment-${index}.png`);
+    const response = await realFetch(`${base}/admin/uploads/gallery`, {method:'POST', headers:{Authorization:`Bearer ${token}`}, body:form});
+    assert.equal(response.status, 201);
+    const {data} = await response.json();
+    assert.equal((await realFetch(new URL(data.path, base))).status, 200);
+    images.push({id:`image-${index}`, url:data.path, title:`Moment ${index + 1}`});
+  }
+  const row = await call('/content/admin/gallery', {method:'POST', status:201, body:{title:'Gallery upload check', status:'published', payload:{images}}});
+  const publicRow = await call(`/content/public/gallery/${row.slug}`, {auth:null});
+  assert.deepEqual(publicRow.payload.images, images);
+  const revised = images.slice(1).map((image, index) => index ? image : {...image, title:'Updated title', url:images[0].url});
+  await call(`/content/admin/gallery/${row.id}`, {method:'PUT', body:{payload:{images:revised}}});
+  assert.deepEqual((await call(`/content/public/gallery/${row.slug}`, {auth:null})).payload.images, revised);
+  await call(`/content/admin/gallery/${row.id}`, {method:'PUT', status:422, body:{payload:{images:[{title:'Unsafe',url:'javascript:alert(1)'}]}}});
+  await call(`/content/admin/gallery/${row.id}`, {method:'PUT', status:422, body:{payload:{images:[{title:'',url:images[0].url}]}}});
+  assert.deepEqual((await call(`/content/public/gallery/${row.slug}`, {auth:null})).payload.images, revised);
+  await call(`/content/admin/gallery/${row.id}`, {method:'DELETE'});
+});
+
+test("oversized uploads return an actionable validation error", async () => {
+  const form = new FormData();
+  form.append('file', new Blob([new Uint8Array(5 * 1024 * 1024 + 1)], {type:'image/png'}), 'oversized.png');
+  const response = await realFetch(`${base}/admin/uploads/gallery`, {method:'POST', headers:{Authorization:`Bearer ${token}`}, body:form});
+  assert.equal(response.status, 422);
+  assert.match((await response.json()).message, /5 MB/);
+});
+
 test("settings persist by tab, public values match, private groups stay private", async () => {
   const values = { general: { website_name: "Test Foundation", tagline: "Test tagline" }, header: { header_phone: "12345" }, footer: { footer_content: "Saved footer" }, banners: { banner_1: "/uploads/settings/banner.png" }, donation: { minimum_amount: "100", default_amounts: "100,500", receipt_prefix: "TEST" } };
   await call("/admin/settings", { method: "PUT", body: values });

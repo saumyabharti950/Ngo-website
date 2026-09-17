@@ -21,7 +21,7 @@ export default function PublicWebsite({ path, previewData }) {
   const preview = Boolean(previewData);
   const preventAction = (event) => { event.preventDefault(); event.stopPropagation(); };
   return <div className="public-website" onClickCapture={preview ? (event) => { if (event.target.closest("a")) preventAction(event); } : undefined} onSubmitCapture={preview ? preventAction : undefined}>
-    <Navbar preview={preview} />
+    <Navbar preview={preview} path={path} />
     <main>
       {showSlider && <PageBanner key={`${bannerPath}:${previewData?.activeSlide || 0}`} slides={slider.slides} initialIndex={previewData?.activeSlide || 0} preview={preview} />}
       {previewData?.kind === "content" && previewData.view !== "listing" ? <ContentDetailView item={previewData.item} /> : path === "/" ? <>

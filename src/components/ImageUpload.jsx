@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { ImagePlus, Link, Trash2, Upload } from "lucide-react";
 import { assetUrl, uploadFile } from "../lib/api";
 
@@ -7,12 +7,14 @@ export default function ImageUpload({ scope, label, value, disabled, onChange, o
   const [error, setError] = useState("");
   const [previewErrorFor, setPreviewErrorFor] = useState("");
   const inputId = useId();
+  const fileInput = useRef(null);
 
   const upload = async (event) => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
     setError("");
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) { setError("Choose a JPG, PNG, WebP or GIF image."); return; }
     if (file.size > 5 * 1024 * 1024) {
       setError("Please choose an image smaller than 5 MB.");
       return;
@@ -37,7 +39,7 @@ export default function ImageUpload({ scope, label, value, disabled, onChange, o
     </div>
     <div className="image-upload-controls">
       <label className="image-upload-url"><span><Link size={14} /> Image URL</span><input disabled={disabled || uploading} value={value || ""} placeholder="Paste image link or /images/photo.jpg" onChange={(event) => onChange(event.target.value)} /></label>
-      {!disabled && <label className="image-upload-button" htmlFor={inputId}><Upload size={16} />{uploading ? "Uploading..." : "Choose image"}<input id={inputId} type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={uploading} onChange={upload} /></label>}
+      {!disabled && <><button type="button" className="image-upload-button" disabled={uploading} onClick={() => fileInput.current?.click()}><Upload size={16} />{uploading ? "Uploading..." : "Choose image"}</button><input ref={fileInput} id={inputId} aria-label={`Upload ${label}`} type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden disabled={uploading} onChange={upload} /></>}
     </div>
     {!disabled && <p className="image-upload-help">JPG, PNG, WebP or GIF · maximum 5 MB</p>}
     {error && <p className="form-message error" role="alert">{error}</p>}

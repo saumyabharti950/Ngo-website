@@ -3,6 +3,8 @@ import ContactDetails from "./ContactDetails";
 import ContentDetailView from "./ContentDetailView";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
+import ContentCollection, { collectionThemes } from "./ContentCollection";
+import GalleryView from "./GalleryView";
 
 const pages = {
   "/about-us": {
@@ -67,6 +69,8 @@ function DynamicContentPage({ module, fallbackPage, previewContent }) {
   const items = previewContent ? [previewContent, ...state.items.filter((item) => item.id !== previewContent.id)] : state.items;
   const loading = previewContent ? false : state.loading;
   const error = previewContent ? "" : state.error;
+  if (module === 'gallery') return <GalleryView items={items} loading={loading} error={error}/>;
+  if (collectionThemes[module]) return <ContentCollection key={module} module={module} items={items} loading={loading} error={error} />;
   return <section className="site-page"><div className="container">
     <div className="page-intro"><span>{fallbackPage.eyebrow}</span><h1>{fallbackPage.title}</h1><p>{fallbackPage.text}</p></div>
     {loading ? <p role="status">Loading...</p> : error ? <p role="alert">Unable to load content. Please try again later.</p> : items.length ? <ContentCards items={items} module={module} /> : <p>No published content yet.</p>}

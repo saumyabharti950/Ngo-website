@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, assetUrl } from "../lib/api";
+import { EditorialCard, collectionThemes } from "./ContentCollection";
+import { GalleryGrid } from "./GalleryView";
 
 export const contentPaths = { gallery: "/gallery", programmes: "/programmes", impact_stories: "/impact-stories", blogs: "/blog" };
 
@@ -23,6 +25,8 @@ export function usePublishedContent(module) {
 }
 
 export function ContentCards({ items, module }) {
+  if (module === 'gallery') return <GalleryGrid items={items}/>;
+  if (collectionThemes[module]) return <div className="editorial-grid">{items.map((item, index) => <EditorialCard key={item.id || item.slug} item={item} module={module} index={index} />)}</div>;
   return <div className="page-card-grid cms-card-grid">{items.map((item) => <article key={item.id}>
     {(item.featuredImage || item.image1) && <a href={`${contentPaths[module]}/${encodeURIComponent(item.slug)}`}><img src={assetUrl(item.featuredImage || item.image1)} alt={item.payload?.altText || item.title} /></a>}
     {item.category && <span className="small-label">{item.category}</span>}

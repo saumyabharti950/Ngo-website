@@ -8,6 +8,7 @@
     "start": "node src/server.js",
     "migrate": "sequelize-cli db:migrate",
     "seed": "sequelize-cli db:seed:all",
+    "seed:foundation": "sequelize-cli db:seed --seed 20260917150000-foundation-programmes.cjs 20260917150100-foundation-blogs.cjs 20260917150200-foundation-impact-stories.cjs",
     "test": "node --test tests/*.test.js",
     "db:reset": "sequelize-cli db:migrate:undo:all && sequelize-cli db:migrate && sequelize-cli db:seed:all"
   },
