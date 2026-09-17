@@ -1,6 +1,6 @@
 # SIFI Foundation NGO Platform
 
-React NGO website with a separate secure Express + MySQL backend, RBAC admin dashboard, CMS APIs, contact messages, and Razorpay-ready donations.
+React NGO website with a separate Express + MySQL backend, RBAC admin dashboard, CMS APIs, contact messages, and Razorpay, Stripe and Cashfree donations. See [settings, CMS and gateway setup](README_ADMIN_CMS_PAYMENTS.md).
 
 ## Frontend
 
@@ -30,7 +30,7 @@ Create MySQL database:
 CREATE DATABASE ngo_website CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-Update `backend/.env` with DB credentials, JWT secret, Super Admin credentials, and Razorpay keys.
+Update `backend/.env` with DB credentials, a random JWT secret and Super Admin credentials. Set a stable random `PAYMENT_ENCRYPTION_KEY` in `backend/.env.local`, then add merchant credentials through Admin > Payment Gateways.
 
 ```bash
 npm run migrate
@@ -47,10 +47,10 @@ SUPER_ADMIN_PASSWORD=ChangeMe123!
 
 ## Main Workflows
 
-- Public website loads dynamic settings and CMS records when the API is running, with existing static content as fallback.
+- Public website loads saved settings and published CMS records. Empty/error states do not substitute sample CMS records.
 - `/login` supports admin login and donor registration.
 - `/admin` is permission-aware and exposes dashboard, users, roles, permissions, CMS lists, settings, contact messages, donations, donor history, and profile password change.
-- `/donate` requires login, creates a backend donation order, opens Razorpay when keys are configured, and verifies payment server-side.
+- `/donate` requires login, creates an order using the active Razorpay/Stripe/Cashfree gateway, and verifies payment server-side. Online checkout is disabled when no gateway is active.
 - Donation invoices are generated through authenticated API routes and are not exposed as public static files.
 
 ## Verification

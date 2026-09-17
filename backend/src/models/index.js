@@ -6,6 +6,15 @@ const config = dbConfig[env];
 export const sequelize = new Sequelize(config.database, config.username, config.password, config);
 
 const common = { underscored: true, paranoid: true };
+// MariaDB can expose JSON columns as text through the MySQL driver.
+const jsonColumn = (field) => ({
+  type: DataTypes.JSON,
+  get() {
+    const value = this.getDataValue(field);
+    if (typeof value !== "string") return value;
+    try { return JSON.parse(value); } catch { return null; }
+  }
+});
 
 export const Role = sequelize.define("Role", {
   name: { type: DataTypes.STRING, allowNull: false },
@@ -64,7 +73,7 @@ export const Content = sequelize.define("Content", {
   description: DataTypes.TEXT("long"),
   content: DataTypes.TEXT("long"),
   category: DataTypes.STRING,
-  tags: DataTypes.JSON,
+  tags: jsonColumn("tags"),
   metaTitle: DataTypes.STRING,
   metaDescription: DataTypes.TEXT,
   featuredImage: DataTypes.STRING,
@@ -74,7 +83,7 @@ export const Content = sequelize.define("Content", {
   image4: DataTypes.STRING,
   videoUrl: DataTypes.STRING,
   documentFile: DataTypes.STRING,
-  payload: DataTypes.JSON,
+  payload: jsonColumn("payload"),
   status: { type: DataTypes.ENUM("draft", "published", "unpublished", "scheduled"), defaultValue: "draft" },
   featured: { type: DataTypes.BOOLEAN, defaultValue: false },
   sortOrder: { type: DataTypes.INTEGER, defaultValue: 0 },
@@ -99,6 +108,15 @@ export const ContactMessage = sequelize.define("ContactMessage", {
   status: { type: DataTypes.ENUM("unread", "read", "archived"), defaultValue: "unread" }
 }, { ...common, paranoid: false });
 
+export const PaymentGateway = sequelize.define("PaymentGateway", {
+  name: { type: DataTypes.STRING, allowNull: false },
+  provider: { type: DataTypes.STRING, allowNull: false },
+  mode: { type: DataTypes.STRING, allowNull: false, defaultValue: "test" },
+  publicKey: { type: DataTypes.STRING, allowNull: false },
+  secretKey: { type: DataTypes.TEXT, allowNull: false },
+  activeSlot: { type: DataTypes.INTEGER, allowNull: true, unique: true }
+}, { ...common, defaultScope: { attributes: { exclude: ["secretKey"] } } });
+
 export const Donation = sequelize.define("Donation", {
   transactionUuid: { type: DataTypes.UUID, allowNull: false, unique: true },
   donationNumber: { type: DataTypes.STRING(10), unique: true },
@@ -116,6 +134,10 @@ export const Donation = sequelize.define("Donation", {
   message: DataTypes.TEXT,
   anonymousDonation: { type: DataTypes.BOOLEAN, defaultValue: false },
   gateway: { type: DataTypes.STRING, defaultValue: "razorpay" },
+  gatewayId: DataTypes.INTEGER,
+  gatewayOrderId: { type: DataTypes.STRING, unique: true },
+  gatewayPaymentId: { type: DataTypes.STRING, unique: true },
+  gatewayCredentials: DataTypes.TEXT,
   razorpayOrderId: { type: DataTypes.STRING, unique: true },
   razorpayPaymentId: { type: DataTypes.STRING, unique: true },
   razorpaySignature: DataTypes.STRING,
@@ -125,8 +147,8 @@ export const Donation = sequelize.define("Donation", {
   receiptNumber: DataTypes.STRING,
   paidAt: DataTypes.DATE,
   refundedAt: DataTypes.DATE,
-  metadata: DataTypes.JSON
-}, common);
+  metadata: jsonColumn("metadata")
+}, { ...common, defaultScope: { attributes: { exclude: ["gatewayCredentials"] } } });
 
 export const AuditLog = sequelize.define("AuditLog", {
   action: { type: DataTypes.STRING, allowNull: false },
@@ -153,4 +175,4 @@ Content.belongsTo(BlogCategory, { as: "blogCategory", foreignKey: "categoryId" }
 User.hasMany(AuditLog);
 AuditLog.belongsTo(User);
 
-export const models = { User, Role, Permission, RolePermission, UserPermission, Setting, Content, BlogCategory, ContactMessage, Donation, AuditLog };
+export const models = { User, Role, Permission, RolePermission, UserPermission, Setting, Content, BlogCategory, ContactMessage, Donation, PaymentGateway, AuditLog };

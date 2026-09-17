@@ -1,3 +1,6 @@
+import { ContentCards, usePublishedContent } from "./PublishedContent";
+import ContactDetails from "./ContactDetails";
+import ContentDetailView from "./ContentDetailView";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 
@@ -44,12 +47,8 @@ const pages = {
   },
 };
 
-function GalleryPage() {
-  const [items, setItems] = useState([]);
-  useEffect(() => { api("/content/public/gallery").then(setItems).catch(() => setItems([])); }, []);
-  const fallback = ["healthcare.jpg", "education.jpg", "food.jpg", "volunteer.jpg", "elderly.jpg", "hero.jpg"].map((image) => ({ id: image, featuredImage: `/images/${image}`, title: "SIFI Foundation community work" }));
-  const images = items.length ? items : fallback;
-  return <section className="site-page"><div className="container"><div className="page-intro"><span>GALLERY</span><h1>Moments of community action</h1><p>A glimpse of the people, partnerships and purpose behind our work.</p></div><div className="gallery-grid">{images.map((item) => <img key={item.id} src={item.featuredImage || item.image1} alt={item.title} />)}</div></div></section>;
+function GalleryPage({ previewContent }) {
+  return <DynamicContentPage previewContent={previewContent} module="gallery" fallbackPage={{ eyebrow: "GALLERY", title: "Moments of community action", text: "People, partnerships and purpose behind our work." }} />;
 }
 
 const newPages = {
@@ -63,22 +62,28 @@ function NewPage({ page }) {
   return <section className="feature-page"><div className="feature-page-orb orb-one" /><div className="feature-page-orb orb-two" /><div className="container feature-page-grid"><div className="feature-page-copy"><span>{page.eyebrow}</span><h1>{page.title}</h1><p>{page.text}</p><a className="btn btn-primary" href={page.eyebrow === "CONTACT SIFI" ? "mailto:info@sififoundation.org" : "/donate"}>{page.eyebrow === "CONTACT SIFI" ? "Email our team" : "Start today"}</a></div><div className="feature-page-image"><img src={`/images/${page.image}`} alt="SIFI Foundation community work" /><div>Community-led<br/><strong>change</strong></div></div></div><div className="container feature-page-cards">{page.cards.map(([title, text], index) => <article key={title}><b>0{index + 1}</b><h2>{title}</h2><p>{text}</p></article>)}</div></section>;
 }
 
-function DynamicContentPage({ module, fallbackPage }) {
-  const [items, setItems] = useState([]);
-  useEffect(() => { api(`/content/public/${module}`).then(setItems).catch(() => setItems([])); }, [module]);
-  if (!items.length) return <NewPage page={fallbackPage} />;
-  const base = module === "programmes" ? "/programmes" : module === "impact_stories" ? "/impact-stories" : module === "blogs" ? "/blog" : "/gallery";
-  return <section className="site-page"><div className="container"><div className="page-intro"><span>{fallbackPage.eyebrow}</span><h1>{fallbackPage.title}</h1><p>{fallbackPage.text}</p></div><div className="page-card-grid">{items.map((item) => <article key={item.id}><h2>{item.title}</h2><p>{item.shortDescription || item.description || item.content}</p>{item.featuredImage && <img src={item.featuredImage} alt={item.title} />}<a className="table-action" href={`${base}/${item.slug}`}>View Details</a></article>)}</div></div></section>;
+function DynamicContentPage({ module, fallbackPage, previewContent }) {
+  const state = usePublishedContent(module);
+  const items = previewContent ? [previewContent, ...state.items.filter((item) => item.id !== previewContent.id)] : state.items;
+  const loading = previewContent ? false : state.loading;
+  const error = previewContent ? "" : state.error;
+  return <section className="site-page"><div className="container">
+    <div className="page-intro"><span>{fallbackPage.eyebrow}</span><h1>{fallbackPage.title}</h1><p>{fallbackPage.text}</p></div>
+    {loading ? <p role="status">Loading...</p> : error ? <p role="alert">Unable to load content. Please try again later.</p> : items.length ? <ContentCards items={items} module={module} /> : <p>No published content yet.</p>}
+  </div></section>;
 }
 
 function DynamicDetailPage({ module, slug }) {
   const [item, setItem] = useState(null);
   const [error, setError] = useState("");
-  useEffect(() => { api(`/content/public/${module}/${slug}`).then(setItem).catch((err) => setError(err.message)); }, [module, slug]);
-  if (error) return <section className="site-page"><div className="container"><div className="page-intro"><span>NOT FOUND</span><h1>Content not available</h1><p>{error}</p></div></div></section>;
-  if (!item) return <section className="site-page"><div className="container"><div className="page-intro"><span>LOADING</span><h1>Please wait...</h1></div></div></section>;
-  const images = [item.featuredImage, item.image1, item.image2, item.image3, item.image4].filter(Boolean);
-  return <section className="site-page"><div className="container"><div className="page-intro"><span>{item.module?.replaceAll("_", " ")}</span><h1>{item.title}</h1><p>{item.shortDescription}</p></div>{images.length > 0 && <div className="gallery-grid detail-gallery">{images.map((image) => <img key={image} src={image} alt={item.title} />)}</div>}<article className="admin-card public-detail"><p>{item.description || item.content}</p></article></div></section>;
+  useEffect(() => {
+    let current = true;
+    api('/content/public/' + module + '/' + encodeURIComponent(slug)).then((value) => { if (current) setItem(value); }).catch((err) => { if (current) setError(err.message); });
+    return () => { current = false; };
+  }, [module, slug]);
+  if (error) return <section className="site-page"><div className="container"><h1>Content not available</h1><p>{error}</p></div></section>;
+  if (!item) return <section className="site-page"><div className="container"><p role="status">Loading...</p></div></section>;
+  return <ContentDetailView item={item} />;
 }
 
 function ContactPage() {
@@ -102,7 +107,7 @@ function ContactPage() {
         <div className="feature-page-copy">
           <span>CONTACT SIFI</span>
           <h1>Let's make good work possible together.</h1>
-          <p>Reach out about partnerships, volunteering, programmes or community priorities.</p>
+          <p>Reach out about partnerships, volunteering, programmes or community priorities.</p><ContactDetails />
         </div>
         <form className="contact-form-card" onSubmit={submit}>
           <label><span>Name</span><input name="name" value={form.name} onChange={update} required /></label>
@@ -449,19 +454,19 @@ function AboutPage({ page }) {
   );
 }
 
-function SitePage({ path }) {
+function SitePage({ path, previewContent }) {
   const [, section, slug] = path.split("/");
-  if (slug && section === "programmes") return <DynamicDetailPage module="programmes" slug={slug} />;
-  if (slug && section === "impact-stories") return <DynamicDetailPage module="impact_stories" slug={slug} />;
-  if (slug && section === "blog") return <DynamicDetailPage module="blogs" slug={slug} />;
-  if (slug && section === "gallery") return <DynamicDetailPage module="gallery" slug={slug} />;
-  if (path === "/programmes") return <DynamicContentPage module="programmes" fallbackPage={{ eyebrow: "OUR WORK", title: pages["/work"].title, text: pages["/work"].text, image: "Takeaction.png", cards: pages["/work"].cards }} />;
-  if (path === "/contact") return <ContactPage />;
-  if (path === "/work") return <DynamicContentPage module="programmes" fallbackPage={{ eyebrow: "OUR WORK", title: pages["/work"].title, text: pages["/work"].text, image: "Takeaction.png", cards: pages["/work"].cards }} />;
-  if (path === "/impact-stories") return <DynamicContentPage module="impact_stories" fallbackPage={{ eyebrow: "IMPACT STORIES", title: pages["/impact-stories"].title, text: pages["/impact-stories"].text, image: "Getinvolbed.png", cards: pages["/impact-stories"].cards }} />;
-  if (path === "/blog") return <DynamicContentPage module="blogs" fallbackPage={newPages["/blog"]} />;
+  if (slug && section === "programmes") return <DynamicDetailPage key={path} module="programmes" slug={decodeURIComponent(slug)} />;
+  if (slug && section === "impact-stories") return <DynamicDetailPage key={path} module="impact_stories" slug={slug} />;
+  if (slug && section === "blog") return <DynamicDetailPage key={path} module="blogs" slug={slug} />;
+  if (slug && section === "gallery") return <DynamicDetailPage key={path} module="gallery" slug={slug} />;
+  if (path === "/programmes") return <DynamicContentPage previewContent={previewContent} module="programmes" fallbackPage={{ eyebrow: "OUR WORK", title: pages["/work"].title, text: pages["/work"].text, image: "Takeaction.png", cards: pages["/work"].cards }} />;
+  if (path === "/contact" || path === "/reach") return <ContactPage />;
+  if (path === "/work") return <DynamicContentPage previewContent={previewContent} module="programmes" fallbackPage={{ eyebrow: "OUR WORK", title: pages["/work"].title, text: pages["/work"].text, image: "Takeaction.png", cards: pages["/work"].cards }} />;
+  if (path === "/impact-stories") return <DynamicContentPage previewContent={previewContent} module="impact_stories" fallbackPage={{ eyebrow: "IMPACT STORIES", title: pages["/impact-stories"].title, text: pages["/impact-stories"].text, image: "Getinvolbed.png", cards: pages["/impact-stories"].cards }} />;
+  if (path === "/blog") return <DynamicContentPage previewContent={previewContent} module="blogs" fallbackPage={newPages["/blog"]} />;
   if (newPages[path]) return <NewPage page={newPages[path]} />;
-  if (path === "/gallery") return <GalleryPage />;
+  if (path === "/gallery") return <GalleryPage previewContent={previewContent} />;
   const page = pages[path] || pages["/about-us"];
   if (path === "/about-us") return <AboutPage page={page} />;
   return <section className="site-page"><div className="container"><div className="page-intro"><span>{page.label}</span><h1>{page.title}</h1><p>{page.text}</p></div><div className="page-card-grid">{page.cards.map(([title, text]) => <article key={title}><h2>{title}</h2><p>{text}</p></article>)}</div></div></section>;

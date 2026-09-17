@@ -20,7 +20,8 @@ export async function streamDonationInvoice(res, donation) {
   [
     ["Donation Number", donation.donationNumber],
     ["Transaction ID", donation.transactionUuid],
-    ["Razorpay Payment ID", donation.razorpayPaymentId || "-"],
+    ["Payment Gateway", donation.gateway],
+    ["Payment ID", donation.gatewayPaymentId || donation.razorpayPaymentId || "-"],
     ["Date", donation.paidAt ? new Date(donation.paidAt).toLocaleString("en-IN") : new Date(donation.createdAt).toLocaleString("en-IN")],
     ["Donor", donation.donorName || donation.User?.name],
     ["Email", donation.email || donation.User?.email],

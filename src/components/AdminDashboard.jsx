@@ -1,10 +1,15 @@
+import ImageUpload from "./ImageUpload";
+import ContentEditor from "./ContentEditor";
+import PageSliderEditor from "./PageSliderEditor";
 import { useEffect, useMemo, useState } from "react";
 import {
   BarChart3, ChevronDown, Eye, FileText, GalleryHorizontal, HandHeart, LayoutDashboard,
   LogOut, MessageSquare, Pencil, Plus, Settings, ShieldCheck, Trash2, UserRound, UsersRound
 } from "lucide-react";
-import { api, assetUrl, uploadFile } from "../lib/api";
+import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import { settingFields, imageSetting } from "../../shared/settings";
+import PaymentGateways from "./PaymentGateways";
 
 const contentModules = {
   "/admin/gallery": { module: "gallery", permission: "gallery", title: "Gallery" },
@@ -33,53 +38,20 @@ const menuGroups = [
     { label: "Transactions", path: "/admin/transactions", permission: "transactions.view" },
     { label: "My Donations", path: "/admin/my-donations" }
   ] },
+  { label: "Page Banners", icon: GalleryHorizontal, items: [{ label: "Banner Sliders", path: "/admin/page-sliders", permission: "settings.view" }] },
   { label: "Website Settings", icon: Settings, items: [{ label: "Settings Wizard", path: "/admin/settings", permission: "settings.view" }] },
+  { label: "Payment Gateways", icon: ShieldCheck, items: [{ label: "Payment Gateways", path: "/admin/payment-gateways", permission: "settings.view" }] },
   { label: "Account", icon: UserRound, items: [{ label: "Profile", path: "/admin/profile" }] }
 ];
 
 const emptyContent = { title: "", slug: "", shortDescription: "", description: "", featuredImage: "", image1: "", image2: "", image3: "", image4: "", status: "draft", featured: false };
 
-const moduleFields = {
-  gallery: {
-    text: ["title", "slug", "category", "shortDescription", "eventDate", "location", "altText", "sortOrder"],
-    long: ["description"],
-    images: ["featuredImage", "image1", "image2", "image3", "image4"],
-    payload: []
-  },
-  programmes: {
-    text: ["title", "slug", "shortDescription", "beneficiaryCount", "ageGroup", "geographicalArea", "state", "district", "location", "startDate", "endDate", "budget", "fundingRequired", "programmeManager", "contactEmail", "contactPhone", "websiteUrl"],
-    long: ["description", "overview", "objectives", "problemStatement", "targetBeneficiaries", "keyActivities", "outcomes", "impactSummary"],
-    images: ["featuredImage", "image1", "image2", "image3", "image4"],
-    payload: ["programmeStatus", "fundingSource", "implementingPartner", "governmentPartner", "communityPartner", "sdgGoals", "tags", "videoUrl"]
-  },
-  impact_stories: {
-    text: ["title", "slug", "shortDescription", "storyDate", "beneficiaryName", "beneficiaryAge", "beneficiaryGender", "location", "district", "state", "category"],
-    long: ["description", "background", "challenge", "intervention", "supportProvided", "journey", "result", "impact", "beforeText", "afterText", "quote", "testimonial"],
-    images: ["featuredImage", "image1", "image2", "image3", "image4"],
-    payload: ["beneficiaryCount", "programmeId", "tags", "videoUrl"]
-  },
-  blogs: {
-    text: ["title", "slug", "shortDescription", "category", "metaTitle", "metaKeywords"],
-    long: ["description", "content", "metaDescription"],
-    images: ["featuredImage", "image1", "image2", "image3", "image4"],
-    payload: ["tags"]
-  }
-};
-
-const settingFields = {
-  general: ["website_name", "website_title", "tagline", "website_description", "copyright_text"],
-  banners: ["banner_1", "banner_2", "banner_3", "banner_4", "banner_5"],
-  header: ["header_logo", "header_phone", "header_email", "header_button_text", "header_button_url", "announcement_text", "announcement_status"],
-  footer: ["footer_logo", "footer_content", "privacy_policy_url", "terms_url"],
-  seo: ["meta_title", "meta_description", "meta_keywords", "canonical_url", "robots", "author", "og_title", "og_description", "og_image", "twitter_title", "twitter_description", "twitter_image"],
-  social: ["facebook", "instagram", "twitter", "youtube", "linkedin", "whatsapp", "telegram"],
-  contact: ["primary_email", "alternate_email", "phone", "alternate_phone", "whatsapp", "address", "city", "state", "country", "pincode", "latitude", "longitude", "office_hours"],
-  donation: ["minimum_amount", "default_amounts", "donation_note", "receipt_prefix"],
-  payment: ["razorpay_key_id", "currency", "gateway_status"]
-};
-
 function rowDate(row) {
   return row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "-";
+}
+
+function labelize(value) {
+  return value.replace(/([a-z0-9])([A-Z])/g, "$1 $2").replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase());
 }
 
 function AdminDashboard({ path }) {
@@ -115,7 +87,9 @@ function AdminDashboard({ path }) {
         else if (path === "/admin/donations") setData(await api("/admin/donations"));
         else if (path === "/admin/transactions") setData(await api("/admin/transactions"));
         else if (path === "/admin/my-donations") setData(await api("/donations/mine"));
-        else if (path === "/admin/settings") setData(await api("/settings"));
+        else if (path === "/admin/page-sliders") setData(await api("/admin/page-sliders"));
+        else if (path === "/admin/settings") setData(await api("/admin/settings"));
+        else if (path === "/admin/payment-gateways") setData(await api("/admin/payment-gateways"));
         else setData(await api("/admin/dashboard"));
       } catch (err) {
         setError(err.message);
@@ -139,7 +113,7 @@ function AdminDashboard({ path }) {
 
   const title = currentTitle(path);
   const rows = Array.isArray(data) ? data : data?.rows || [];
-  const reload = () => setRefreshKey((value) => value + 1);
+  const reload = () => { setRefreshKey((value) => value + 1); window.dispatchEvent(new Event("content-updated")); };
 
   return (
     <section className="admin-layout">
@@ -150,7 +124,7 @@ function AdminDashboard({ path }) {
       </aside>
       <div className="admin-main">
         <header className="admin-topbar"><div><span>Admin Panel</span><h1>{title}</h1></div><div className="admin-user">{user.profilePhoto ? <img src={user.profilePhoto} alt="" /> : user.name?.[0]}<span>{user.name}</span></div></header>
-        {error ? <div className="admin-card forbidden"><h2>403 Access Denied</h2><p>{error}</p></div> : renderPanel({ path, data, rows, can, meta, setModal, reload, user })}
+        {error ? <div className="admin-card forbidden"><h2>Unable to load this page</h2><p>{error}</p><button onClick={reload}>Try again</button></div> : renderPanel({ path, data, rows, can, meta, setModal, reload, user })}
       </div>
       {modal && <CrudModal modal={modal} meta={meta} close={() => setModal(null)} done={() => { setModal(null); reload(); }} />}
     </section>
@@ -181,9 +155,11 @@ function currentTitle(path) {
 
 function renderPanel({ path, data, rows, can, meta, setModal, reload, user }) {
   if (path === "/admin") return <DashboardCards data={data || {}} />;
-  if (path === "/admin/settings") return <SettingsPanel data={data} />;
+  if (path === "/admin/page-sliders") return data ? <PageSliderEditor data={data} canEdit={can("settings.edit")} /> : <p>Loading page banners...</p>;
+  if (path === "/admin/settings") return data ? <SettingsPanel data={data} canEdit={can("settings.edit")} /> : <p>Loading settings...</p>;
   if (path === "/admin/profile") return <ProfilePanel user={user} />;
-  if (path === "/admin/my-donations") return <MyDonations rows={rows} />;
+  if (path === "/admin/my-donations") return <MyDonations rows={rows} reload={reload} />;
+  if (path === "/admin/payment-gateways") return <PaymentGateways rows={rows} canEdit={can("settings.edit")} reload={reload} />;
   if (contentModules[path]) return <ContentCrud config={contentModules[path]} rows={rows} can={can} setModal={setModal} reload={reload} />;
   if (path === "/admin/users") return <UserCrud rows={rows} can={can} meta={meta} setModal={setModal} reload={reload} />;
   if (path === "/admin/roles") return <RoleCrud rows={rows} can={can} meta={meta} setModal={setModal} reload={reload} />;
@@ -303,14 +279,21 @@ function DonationTable({ title, rows }) {
   ]} />;
 }
 
-function CrudModal({ modal, meta, close, done }) {
+function CrudModal(props) {
+  return props.modal.type === "content" ? <ContentEditor {...props} /> : <RecordModal {...props} />;
+}
+
+function RecordModal({ modal, meta, close, done }) {
   const readOnly = modal.mode === "view";
   const [form, setForm] = useState(modal.row || {});
   const [message, setMessage] = useState("");
+  const [saving, setSaving] = useState(false);
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
   const save = async (event) => {
     event.preventDefault();
+    if (saving) return;
     if (readOnly) return close();
+    setSaving(true);
     try {
       if (modal.type === "content") {
         const method = modal.mode === "edit" ? "PUT" : "POST";
@@ -332,36 +315,21 @@ function CrudModal({ modal, meta, close, done }) {
       done();
     } catch (error) {
       setMessage(error.message);
-    }
+    } finally { setSaving(false); }
   };
 
   return (
     <div className="crud-overlay">
-      <form className="crud-modal" onSubmit={save}>
-        <div className="crud-head"><h2>{modal.mode} {modal.config?.title || modal.type}</h2><button type="button" onClick={close}>x</button></div>
-        {modal.type === "content" && <ContentForm form={form} update={update} readOnly={readOnly} module={modal.config.module} />}
+      <form className="crud-modal" role="dialog" aria-modal="true" aria-labelledby="crud-title" onSubmit={save}>
+        <div className="crud-head"><h2 id="crud-title">{modal.mode} {modal.config?.title || modal.type}</h2><button type="button" aria-label="Close dialog" onClick={close}>x</button></div>
         {modal.type === "user" && <UserForm form={form} update={update} meta={meta} readOnly={readOnly} />}
         {modal.type === "role" && <RoleForm form={form} update={update} meta={meta} readOnly={readOnly} />}
         {modal.type === "permission" && <PermissionForm form={form} update={update} readOnly={readOnly} />}
         {message && <p className="form-message error">{message}</p>}
-        <div className="crud-actions"><button type="button" onClick={close}>Cancel</button><button className="btn btn-primary" type="submit">{readOnly ? "Close" : "Save"}</button></div>
+        <div className="crud-actions"><button type="button" onClick={close}>Cancel</button><button className="btn btn-primary" type="submit" disabled={saving}>{saving ? "Saving..." : readOnly ? "Close" : "Save"}</button></div>
       </form>
     </div>
   );
-}
-
-function ContentForm({ form, update, readOnly, module }) {
-  const config = moduleFields[module] || moduleFields.gallery;
-  const payload = form.payload || {};
-  const updatePayload = (key, value) => update("payload", { ...payload, [key]: value });
-  return <div className="crud-grid">
-    {config.text.map((key) => <label key={key}><span>{labelize(key)}</span><input disabled={readOnly} value={form[key] ?? payload[key] ?? ""} onChange={(event) => (key in form || !config.payload.includes(key)) ? update(key, event.target.value) : updatePayload(key, event.target.value)} /></label>)}
-    {config.payload.map((key) => <label key={key}><span>{labelize(key)}</span><input disabled={readOnly} value={payload[key] || ""} onChange={(event) => updatePayload(key, event.target.value)} /></label>)}
-    {config.images.map((key) => <ImageUpload key={key} scope={module} label={labelize(key)} value={form[key]} disabled={readOnly} onChange={(value) => update(key, value)} />)}
-    <label><span>Status</span><select disabled={readOnly} value={form.status || "draft"} onChange={(event) => update("status", event.target.value)}><option>draft</option><option>published</option><option>unpublished</option></select></label>
-    <label className="check-field"><input disabled={readOnly} type="checkbox" checked={Boolean(form.featured)} onChange={(event) => update("featured", event.target.checked)} /> Featured</label>
-    {config.long.map((key) => <label className="wide" key={key}><span>{labelize(key)}</span><textarea disabled={readOnly} rows="5" value={form[key] ?? payload[key] ?? ""} onChange={(event) => (key in form || key === "description" || key === "content") ? update(key, event.target.value) : updatePayload(key, event.target.value)} /></label>)}
-  </div>;
 }
 
 function UserForm({ form, update, meta, readOnly }) {
@@ -391,20 +359,61 @@ function PermissionForm({ form, update, readOnly }) {
   </div>;
 }
 
-function SettingsPanel({ data }) {
-  const steps = ["general", "header", "footer", "seo", "social", "contact", "donation", "payment"];
+function SettingsFields({ active, values, update, disabled, onUploadingChange }) {
+  return (
+      <div id="settings-fields" role="tabpanel" aria-label={labelize(active)} className="settings-fields">
+        {settingFields[active].map((key) => imageSetting(key)
+          ? <ImageUpload key={key} scope="settings" onUploadingChange={onUploadingChange} label={labelize(key)} value={values[key]} disabled={disabled} onChange={(value) => update(key, value)} />
+          : <label key={key}><span>{labelize(key)}</span>{key === "announcement_status"
+            ? <select value={values[key] || "inactive"} onChange={(event) => update(key, event.target.value)}><option value="inactive">Hidden</option><option value="active">Visible</option></select>
+            : /description|content|address|note/.test(key)
+              ? <textarea rows="4" value={values[key] ?? ""} onChange={(event) => update(key, event.target.value)} />
+              : <input type={key.includes("email") ? "email" : key === "minimum_amount" ? "number" : "text"} min={key === "minimum_amount" ? 1 : undefined} placeholder={key === "default_amounts" ? "500, 1000, 5000" : ""} value={values[key] ?? ""} onChange={(event) => update(key, event.target.value)} />}</label>)}
+      </div>
+  );
+}
+
+function SettingsPanel({ data, canEdit = true }) {
+  const steps = Object.keys(settingFields);
   const [active, setActive] = useState("general");
   const [draft, setDraft] = useState(data || {});
   const [message, setMessage] = useState("");
-  const save = async () => {
-    await api("/admin/settings", { method: "PUT", body: draft });
-    setMessage("Settings saved.");
+  const [saving, setSaving] = useState(false);
+  const [uploads, setUploads] = useState(0);
+  const trackUpload = (change) => setUploads((count) => count + change);
+  const save = async (event) => {
+    event.preventDefault();
+    if (uploads || saving) return;
+    setSaving(true);
+    setMessage("");
+    try {
+      const saved = await api("/admin/settings", { method: "PUT", body: draft });
+      setDraft(saved);
+      window.dispatchEvent(new Event("settings-updated"));
+      setMessage("Settings saved. Your website has been updated.");
+    } catch (error) {
+      setMessage(error.message);
+    } finally { setSaving(false); }
   };
   const values = draft[active] || {};
-  return <section className="admin-card settings-card"><div className="settings-steps">{steps.map((step) => <button className={active === step ? "active" : ""} onClick={() => setActive(step)} key={step}>{step}</button>)}</div><div className="settings-fields">{["website_name", "website_title", "tagline", "header_phone", "header_email", "footer_content", "meta_title", "facebook", "primary_email", "phone", "address", "razorpay_key_id"].map((key) => <label key={key}><span>{key.replaceAll("_", " ")}</span><input value={values[key] || ""} onChange={(event) => setDraft((current) => ({ ...current, [active]: { ...(current[active] || {}), [key]: event.target.value } }))} /></label>)}</div><button className="btn btn-primary" onClick={save}>Save Settings</button>{message && <p className="form-message">{message}</p>}</section>;
+  const update = (key, value) => setDraft((current) => ({ ...current, [active]: { ...(current[active] || {}), [key]: value } }));
+  return <section className="admin-card settings-card">
+    <div className="settings-steps" role="tablist" aria-label="Website settings">{steps.map((step) => <button type="button" role="tab" aria-selected={active === step} aria-controls="settings-fields" className={active === step ? "active" : ""} onClick={() => { setActive(step); setMessage(""); }} key={step}>{labelize(step)}</button>)}</div>
+    <form onSubmit={save}><fieldset disabled={!canEdit || saving} className="settings-fieldset">
+      <SettingsFields active={active} values={values} update={update} disabled={!canEdit || saving} onUploadingChange={trackUpload} />
+      {canEdit && <button className="btn btn-primary" type="submit" disabled={uploads > 0}>{uploads ? "Uploading..." : saving ? "Saving..." : "Save Settings"}</button>}
+    </fieldset></form>{message && <p className="form-message" role="status">{message}</p>}
+  </section>;
 }
 
-function MyDonations({ rows }) {
+function MyDonations({ rows, reload }) {
+  const [message, setMessage] = useState("");
+  const checkPayment = async (donation) => {
+    try {
+      await api("/donations/verify", { method: "POST", body: { donationId: donation.id } });
+      setMessage("Payment verified."); reload();
+    } catch (error) { setMessage(error.message); }
+  };
   const downloadInvoice = async (donation) => {
     const response = await api(`/donations/download/${donation.donationNumber}`, { raw: true });
     const blob = await response.blob();
@@ -415,7 +424,7 @@ function MyDonations({ rows }) {
     link.click();
     URL.revokeObjectURL(url);
   };
-  return <DataTable title="My Donations" rows={rows} columns={[{ key: "donationNumber", label: "Donation Number" }, { key: "amount", label: "Amount", render: (row) => `${row.currency || "INR"} ${row.amount}` }, { key: "status", label: "Status" }, { key: "paymentMethod", label: "Payment Method" }, { key: "createdAt", label: "Date", render: rowDate }, { key: "invoice", label: "Invoice", render: (row) => row.donationNumber ? <button className="table-action" onClick={() => downloadInvoice(row)}>Download</button> : "-" }]} />;
+  return <>{message && <p role="status">{message}</p>}<DataTable title="My Donations" rows={rows} columns={[{ key: "donationNumber", label: "Donation Number" }, { key: "amount", label: "Amount", render: (row) => `${row.currency || "INR"} ${row.amount}` }, { key: "status", label: "Status" }, { key: "gateway", label: "Gateway" }, { key: "createdAt", label: "Date", render: rowDate }, { key: "invoice", label: "Receipt / Status", render: (row) => row.donationNumber ? <button className="table-action" onClick={() => downloadInvoice(row)}>Download</button> : row.gatewayOrderId && row.status === "pending" ? <button onClick={() => checkPayment(row)}>Check payment status</button> : "-" }]} /></>;
 }
 
 function ProfilePanel({ user }) {

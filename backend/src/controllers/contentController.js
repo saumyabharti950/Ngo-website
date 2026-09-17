@@ -2,6 +2,7 @@ import { Op } from "sequelize";
 import { Content } from "../models/index.js";
 import { asyncHandler, ok, ApiError } from "../utils/response.js";
 import { makeSlug } from "../utils/slug.js";
+import { contentPayload } from "../utils/contentPayload.js";
 
 const modules = new Set(["gallery", "programmes", "impact_stories", "blogs"]);
 
@@ -33,15 +34,18 @@ export const adminList = asyncHandler(async (req, res) => {
 
 export const createContent = asyncHandler(async (req, res) => {
   const module = moduleFromReq(req);
-  const slug = req.body.slug || makeSlug(req.body.title);
-  const item = await Content.create({ ...req.body, module, slug, createdBy: req.user.id, updatedBy: req.user.id, publishedAt: req.body.status === "published" ? new Date() : req.body.publishedAt });
+  const values = contentPayload(req.body);
+  if (!values.title) throw new ApiError(422, "Title is required");
+  const slug = values.slug || makeSlug(values.title);
+  const item = await Content.create({ ...values, module, slug, createdBy: req.user.id, updatedBy: req.user.id, publishedAt: values.status === "published" ? new Date() : null });
   ok(res, item, "Content created", 201);
 });
 
 export const updateContent = asyncHandler(async (req, res) => {
   const item = await Content.findOne({ where: { id: req.params.id, module: moduleFromReq(req) } });
   if (!item) throw new ApiError(404, "Content not found");
-  await item.update({ ...req.body, updatedBy: req.user.id, slug: req.body.slug || item.slug, publishedAt: req.body.status === "published" && !item.publishedAt ? new Date() : req.body.publishedAt ?? item.publishedAt });
+  const values = contentPayload(req.body, item.payload);
+  await item.update({ ...values, updatedBy: req.user.id, slug: values.slug || item.slug, publishedAt: values.status === "published" && !item.publishedAt ? new Date() : item.publishedAt });
   ok(res, item, "Content updated");
 });
 

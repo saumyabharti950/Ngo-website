@@ -10,6 +10,7 @@ const allowedMime = new Set(["image/jpeg", "image/png", "image/webp", "image/gif
 const storage = multer.diskStorage({
   destination(req, _file, callback) {
     const scope = req.params.scope || "general";
+    if (!["gallery", "programmes", "impact_stories", "blogs", "settings", "banners", "general"].includes(scope)) return callback(new ApiError(422, "Invalid upload category"));
     const directory = path.join(uploadRoot, scope);
     fs.mkdirSync(directory, { recursive: true });
     callback(null, directory);

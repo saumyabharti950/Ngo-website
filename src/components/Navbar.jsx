@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { ArrowRight, ChevronDown, HeartHandshake, Languages, LogOut, Menu, UserRound, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useSiteSettings } from "../context/SiteSettingsContext";
+import { assetUrl } from "../lib/api";
+import { safeUrl } from "../../shared/settings";
 
 const navigation = [
   { href: "/", label: "Home" },
@@ -13,17 +16,26 @@ const navigation = [
   { href: "/contact", label: "Contact" }
 ];
 
-function Navbar() {
+function Navbar({ preview = false }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [language, setLanguage] = useState("en");
   const { user, logout } = useAuth();
+  const { settings } = useSiteSettings();
+  const header = settings.header || {};
+  const name = settings.general?.website_name || "SIFI Foundation";
   const closeMenu = () => setMobileOpen(false);
+  const blockPreview = (event) => { if (preview) event.preventDefault(); };
 
   return (
     <header className="navbar">
+      {(header.announcement_status === "active" || header.header_phone || header.header_email) && <div className="site-announcement">
+        {header.announcement_status === "active" && <span>{header.announcement_text}</span>}
+        {header.header_phone && <a href={`tel:${header.header_phone}`}>{header.header_phone}</a>}
+        {header.header_email && <a href={`mailto:${header.header_email}`}>{header.header_email}</a>}
+      </div>}
       <div className="container navbar-container">
-        <a className="logo brand-logo" href="/" aria-label="SIFI Foundation home" onClick={closeMenu}>
-          <img src="/images/SIFI%20Foundation%20logo.png" alt="SIFI Foundation" />
+        <a className="logo brand-logo" href="/" aria-label="SIFI Foundation home" onClick={(event) => { blockPreview(event); closeMenu(); }}>
+          <img src={assetUrl(header.header_logo || "/images/SIFI%20Foundation%20logo.png")} alt={name} />
         </a>
         <nav className="desktop-nav" aria-label="Main navigation">
           {navigation.map((item) => item.items ? (
@@ -41,7 +53,7 @@ function Navbar() {
               <option value="hi">Hindi</option>
             </select>
           </label>
-          <a className="btn btn-primary nav-donate" href="/donate"><HeartHandshake size={16} />Donate <ArrowRight size={16} /></a>
+          <a className="btn btn-primary nav-donate" href={safeUrl(header.header_button_url) || "/donate"}><HeartHandshake size={16} />{header.header_button_text ?? "Donate"} <ArrowRight size={16} /></a>
           {user ? (
             <div className="profile-menu">
               <button type="button"><UserRound size={16} />{user.name}<ChevronDown size={14} /></button>
@@ -69,7 +81,7 @@ function Navbar() {
               <button type="button" onClick={() => { closeMenu(); logout(); }}>Logout</button>
             </>
           ) : <a href="/login" onClick={closeMenu}>Login</a>}
-          <a className="mobile-donate" href="/donate" onClick={closeMenu}>Donate</a>
+          <a className="mobile-donate" href={safeUrl(header.header_button_url) || "/donate"} onClick={closeMenu}>{header.header_button_text ?? "Donate"}</a>
         </nav>
       )}
     </header>

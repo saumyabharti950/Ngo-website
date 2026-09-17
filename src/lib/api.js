@@ -52,7 +52,7 @@ export async function uploadFile(scope, file) {
 export function assetUrl(value) {
   if (!value) return "";
   if (value.startsWith("http") || value.startsWith("/images/")) return value;
-  const apiOrigin = new URL(API_BASE_URL).origin;
+  const apiOrigin = new URL(API_BASE_URL, typeof window === "undefined" ? "http://localhost" : window.location.origin).origin;
   return value.startsWith("/") ? `${apiOrigin}${value}` : value;
 }
 

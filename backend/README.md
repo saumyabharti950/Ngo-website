@@ -50,6 +50,12 @@ Change these before production.
 - `GET /api/v1/admin/roles`
 - `GET /api/v1/admin/permissions`
 - `PUT /api/v1/admin/settings`
+- `GET /api/v1/admin/settings`
+- `GET/POST /api/v1/admin/payment-gateways`
+- `PUT/DELETE /api/v1/admin/payment-gateways/:id`
+- `POST /api/v1/admin/payment-gateways/:id/activate`
+- `POST /api/v1/admin/payment-gateways/:id/deactivate`
+- `GET /api/v1/donations/config`
 - `GET /api/v1/admin/donations`
 
 Responses use:
@@ -66,4 +72,6 @@ Errors use:
 
 ## Security
 
-The API uses Helmet, CORS allow-listing, rate limiting, bcrypt password hashing, JWT auth, Sequelize prepared statements, RBAC middleware, soft deletes, audit logs, and server-side Razorpay signature checks. Razorpay secret, JWT secret, and database credentials stay in backend `.env` only.
+The API uses Helmet, CORS allow-listing, rate limiting, bcrypt password hashing, JWT auth, Sequelize prepared statements, RBAC middleware, soft deletes, audit logs, and server-side payment verification. Gateway secrets are encrypted in the database and omitted from API responses. Keep `PAYMENT_ENCRYPTION_KEY`, JWT secret and database credentials in the server environment or ignored local environment files.
+
+See [settings, CMS and payment gateway setup](../README_ADMIN_CMS_PAYMENTS.md) for migration, provider configuration, payment reconciliation and test instructions.

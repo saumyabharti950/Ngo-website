@@ -19,7 +19,9 @@ function LoginPage() {
     try {
       const action = mode === "login" ? login : register;
       await action(form);
-      window.history.pushState({}, "", "/admin");
+      const returnTo = sessionStorage.getItem("sifi_return_to");
+      sessionStorage.removeItem("sifi_return_to");
+      window.history.pushState({}, "", returnTo?.startsWith("/donate") ? returnTo : "/admin");
       window.dispatchEvent(new PopStateEvent("popstate"));
     } catch (error) {
       setMessage(error.message);

@@ -1,16 +1,10 @@
 import { useEffect, useState } from "react";
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import Stats from "./components/Stats";
-import Causes from "./components/Causes";
-import Campaigns from "./components/Campaigns";
-import Footer from "./components/Footer";
-import ContentSections from "./components/ContentSections";
-import SitePage from "./components/SitePage";
-import DonationPage from "./components/DonationPage";
-import LoginPage from "./components/LoginPage";
 import AdminDashboard from "./components/AdminDashboard";
+import PublicWebsite from "./components/PublicWebsite";
+import PreviewPage from "./components/PreviewPage";
 import { AuthProvider } from "./context/AuthContext";
+import { SiteSettingsProvider } from "./context/SiteSettingsContext";
+import { PageSlidersProvider } from "./context/PageSlidersContext";
 
 const getCurrentPath = () => window.location.pathname.replace(/\/$/, "") || "/";
 
@@ -49,33 +43,12 @@ function App() {
 
   const isHome = path === "/";
   const isAdmin = path.startsWith("/admin");
+  const isPreview = path === "/preview";
 
   return (
-    <AuthProvider>
-      {isAdmin ? <AdminDashboard path={path} /> : (
-        <>
-          <Navbar />
-          <main>
-            {isHome ? (
-              <>
-                <Hero />
-                <Stats />
-                <Causes />
-                <Campaigns />
-                <ContentSections />
-              </>
-            ) : path === "/donate" ? (
-              <DonationPage />
-            ) : path === "/login" ? (
-              <LoginPage />
-            ) : (
-              <SitePage path={path} />
-            )}
-          </main>
-          <Footer />
-        </>
-      )}
-    </AuthProvider>
+    <AuthProvider><SiteSettingsProvider><PageSlidersProvider>
+      {isPreview ? <PreviewPage /> : isAdmin ? <AdminDashboard key={path} path={path} /> : <PublicWebsite path={isHome ? "/" : path} />}
+    </PageSlidersProvider></SiteSettingsProvider></AuthProvider>
   );
 }
 

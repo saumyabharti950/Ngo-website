@@ -1,15 +1,9 @@
-import { useEffect, useState } from "react";
-import { Mail, Phone, MapPin } from "lucide-react";
-import { FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube } from "react-icons/fa6";
-import { api } from "../lib/api";
-
-const socialLinks = [
-  { label: "Facebook", href: "https://www.facebook.com/sififoundation", Icon: FaFacebookF },
-  { label: "Instagram", href: "https://www.instagram.com/sififoundation", Icon: FaInstagram },
-  { label: "LinkedIn", href: "https://www.linkedin.com/company/sifi-foundation", Icon: FaLinkedinIn },
-  { label: "YouTube", href: "https://www.youtube.com/@sififoundation", Icon: FaYoutube },
-];
-
+import { FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube, FaXTwitter, FaWhatsapp, FaTelegram } from "react-icons/fa6";
+import { useSiteSettings } from "../context/SiteSettingsContext";
+import { assetUrl } from "../lib/api";
+import { safeUrl } from "../../shared/settings";
+import ContactDetails from "./ContactDetails";
+const socials = { facebook: FaFacebookF, instagram: FaInstagram, linkedin: FaLinkedinIn, youtube: FaYoutube, twitter: FaXTwitter, whatsapp: FaWhatsapp, telegram: FaTelegram };
 const footerLinks = [
   { title: "About Us", links: [["About SIFI Foundation", "/about-us"], ["Vision & Mission", "/about-us"], ["Leadership", "/credentials"], ["Governance", "/credentials"]] },
   { title: "Initiatives", links: [["Healthcare & Public Health", "/work"], ["Education & Digital Learning", "/work"], ["Skills & Livelihoods", "/work"], ["Environment & Climate", "/work"]] },
@@ -17,38 +11,24 @@ const footerLinks = [
   { title: "Explore More", links: [["Gallery", "/gallery"], ["Research & Knowledge", "/work"], ["Partner With Us", "/reach"], ["Contact Us", "/reach"]] },
 ];
 
+
 function Footer() {
-  const [settings, setSettings] = useState(null);
-  useEffect(() => { api("/settings").then(setSettings).catch(() => {}); }, []);
-  const contact = settings?.contact || {};
-  const social = settings?.social || {};
-  return (
-    <footer className="footer">
-      <div className="footer-aurora" aria-hidden="true" />
-      <div className="footer-prism prism-left" aria-hidden="true" />
-      <div className="footer-prism prism-right" aria-hidden="true" />
-      <div className="container footer-grid">
-        <section className="footer-brand">
-          <a className="footer-logo brand-logo" href="/" aria-label="SIFI Foundation home"><img src="/images/SIFI%20Foundation%20logo.png" alt="SIFI Foundation" /></a>
-          <div className="footer-address"><MapPin size={16}/><span>C/22, Patel Park, Harmu Housing Colony,<br/>Ranchi – 834002, Jharkhand, India</span></div>
-          <a className="footer-contact" href={`mailto:${contact.primary_email || "info@sififoundation.org"}`}><Mail size={16}/> {contact.primary_email || "info@sififoundation.org"}</a>
-          <a className="footer-contact" href={`tel:${contact.phone || "06513591618"}`}><Phone size={16}/> {contact.phone || "0651-3591618"}</a>
-          <div className="footer-social">{socialLinks.map(({ label, href, Icon }) => <a key={label} href={social[label.toLowerCase()] || href} target="_blank" rel="noopener noreferrer" aria-label={`Follow SIFI Foundation on ${label}`} title={label}><Icon aria-hidden="true" /></a>)}</div>
-        </section>
-
-        {footerLinks.map(({ title, links }) => <section className="footer-column" key={title}><h4>{title}</h4>{links.map(([label, href]) => <a key={label} href={href}>{label}</a>)}</section>)}
-
-        <section className="footer-donate">
-          <h4>Support Our Work</h4>
-          <p>Your contribution helps create opportunity, dignity and sustainable change.</p>
-          <a className="btn btn-primary" href="/donate">Donate Now</a>
-          <span>For donation assistance</span>
-          <a href="mailto:projects@sififoundation.org">projects@sififoundation.org</a>
-        </section>
-      </div>
-      <div className="footer-bottom"><div className="container"><p>© {new Date().getFullYear()} Social Initiative for India Foundation. All Rights Reserved.</p><p>A Section 8 Not-for-Profit Organisation</p></div></div>
-    </footer>
-  );
+  const { settings } = useSiteSettings();
+  const footer = settings.footer || {};
+  const general = settings.general || {};
+  return <footer className="footer">
+    <div className="footer-aurora" aria-hidden="true" />
+    <div className="container footer-grid">
+      <section className="footer-brand">
+        <a className="footer-logo brand-logo" href="/"><img src={assetUrl(footer.footer_logo || "/images/SIFI%20Foundation%20logo.png")} alt={general.website_name || "SIFI Foundation"} /></a>
+        {footer.footer_content && <p>{footer.footer_content}</p>}
+        <ContactDetails />
+        <div className="footer-social">{Object.entries(socials).map(([name, Icon]) => safeUrl(settings.social?.[name]) && <a key={name} href={settings.social[name]} target="_blank" rel="noopener noreferrer" aria-label={name}><Icon /></a>)}</div>
+      </section>
+      {footerLinks.map(({ title, links }) => <section className="footer-column" key={title}><h4>{title}</h4>{links.map(([label, href]) => <a key={label} href={href}>{label}</a>)}</section>)}
+      <section className="footer-donate"><h4>Support Our Work</h4><p>{settings.donation?.donation_note ?? "Your contribution helps create opportunity, dignity and sustainable change."}</p><a className="btn btn-primary" href="/donate">Donate Now</a></section>
+    </div>
+    <div className="footer-bottom"><div className="container"><p>&copy; {new Date().getFullYear()} {general.copyright_text ?? "Social Initiative for India Foundation. All Rights Reserved."}</p><div>{safeUrl(footer.privacy_policy_url) && <a href={footer.privacy_policy_url}>Privacy Policy</a>} {safeUrl(footer.terms_url) && <a href={footer.terms_url}>Terms of Use</a>}</div></div></div>
+  </footer>;
 }
-
 export default Footer;
