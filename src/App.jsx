@@ -8,6 +8,9 @@ import Footer from "./components/Footer";
 import ContentSections from "./components/ContentSections";
 import SitePage from "./components/SitePage";
 import DonationPage from "./components/DonationPage";
+import LoginPage from "./components/LoginPage";
+import AdminDashboard from "./components/AdminDashboard";
+import { AuthProvider } from "./context/AuthContext";
 
 const getCurrentPath = () => window.location.pathname.replace(/\/$/, "") || "/";
 
@@ -45,27 +48,34 @@ function App() {
   }, []);
 
   const isHome = path === "/";
+  const isAdmin = path.startsWith("/admin");
 
   return (
-    <>
-      <Navbar />
-      <main>
-        {isHome ? (
-          <>
-            <Hero />
-            <Stats />
-            <Causes />
-            <Campaigns />
-            <ContentSections />
-          </>
-        ) : path === "/donate" ? (
-          <DonationPage />
-        ) : (
-          <SitePage path={path} />
-        )}
-      </main>
-      <Footer />
-    </>
+    <AuthProvider>
+      {isAdmin ? <AdminDashboard path={path} /> : (
+        <>
+          <Navbar />
+          <main>
+            {isHome ? (
+              <>
+                <Hero />
+                <Stats />
+                <Causes />
+                <Campaigns />
+                <ContentSections />
+              </>
+            ) : path === "/donate" ? (
+              <DonationPage />
+            ) : path === "/login" ? (
+              <LoginPage />
+            ) : (
+              <SitePage path={path} />
+            )}
+          </main>
+          <Footer />
+        </>
+      )}
+    </AuthProvider>
   );
 }
 

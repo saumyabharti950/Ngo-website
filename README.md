@@ -1,16 +1,63 @@
-# React + Vite
+# SIFI Foundation NGO Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React NGO website with a separate secure Express + MySQL backend, RBAC admin dashboard, CMS APIs, contact messages, and Razorpay-ready donations.
 
-Currently, two official plugins are available:
+## Frontend
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+cp .env.example .env
+npm run dev
+```
 
-## React Compiler
+Set the backend API URL in `.env`:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```env
+VITE_API_BASE_URL=http://localhost:5000/api/v1
+```
 
-## Expanding the Oxlint configuration
+## Backend
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```bash
+cd backend
+npm install
+copy .env.example .env
+```
+
+Create MySQL database:
+
+```sql
+CREATE DATABASE ngo_website CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Update `backend/.env` with DB credentials, JWT secret, Super Admin credentials, and Razorpay keys.
+
+```bash
+npm run migrate
+npm run seed
+npm run dev
+```
+
+Default development login comes from `backend/.env`:
+
+```env
+SUPER_ADMIN_EMAIL=admin@sififoundation.org
+SUPER_ADMIN_PASSWORD=ChangeMe123!
+```
+
+## Main Workflows
+
+- Public website loads dynamic settings and CMS records when the API is running, with existing static content as fallback.
+- `/login` supports admin login and donor registration.
+- `/admin` is permission-aware and exposes dashboard, users, roles, permissions, CMS lists, settings, contact messages, donations, donor history, and profile password change.
+- `/donate` requires login, creates a backend donation order, opens Razorpay when keys are configured, and verifies payment server-side.
+- Donation invoices are generated through authenticated API routes and are not exposed as public static files.
+
+## Verification
+
+```bash
+npm run build
+cd backend
+npm audit --audit-level=moderate
+node --input-type=module -e "import('./src/app.js').then(()=>console.log('backend import ok'))"
+```

@@ -1,7 +1,21 @@
 import { useState } from "react";
 import { CheckCircle2, Circle, Heart, Info, UserRound } from "lucide-react";
+import { api } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
 
 const amounts = [5000, 10000, 20000];
+
+const loadRazorpay = () => new Promise((resolve) => {
+  if (window.Razorpay) {
+    resolve(true);
+    return;
+  }
+  const script = document.createElement("script");
+  script.src = "https://checkout.razorpay.com/v1/checkout.js";
+  script.onload = () => resolve(true);
+  script.onerror = () => resolve(false);
+  document.body.appendChild(script);
+});
 
 function DonationPage() {
   const [citizen, setCitizen] = useState("indian");
@@ -9,15 +23,65 @@ function DonationPage() {
   const [amount, setAmount] = useState("5000");
   const [purpose, setPurpose] = useState("Elder Care");
   const [message, setMessage] = useState("");
+  const { user } = useAuth();
 
   const chooseAmount = (value) => setAmount(String(value));
-  const proceed = (event) => {
+  const proceed = async (event) => {
     event.preventDefault();
+    if (!user) {
+      window.history.pushState({}, "", "/login");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+      return;
+    }
     const numericAmount = Number(amount.replace(/[^0-9.]/g, ""));
     if (!numericAmount || numericAmount < 1) {
       setMessage("Please enter a valid donation amount.");
       return;
     }
+    try {
+      const data = await api("/donations/create-order", {
+        method: "POST",
+        body: {
+          amount: numericAmount,
+          donorName: user.name,
+          email: user.email,
+          phone: user.phone,
+          message: `${frequency} donation for ${purpose}`
+        }
+      });
+      if (!data.razorpayKeyId) {
+        setMessage(`Donation order created in test mode. Razorpay order: ${data.order.id}. Add Razorpay keys in backend .env to enable checkout.`);
+        return;
+      }
+      const loaded = await loadRazorpay();
+      if (!loaded) {
+        setMessage("Razorpay checkout could not be loaded. Please try again.");
+        return;
+      }
+      const checkout = new window.Razorpay({
+        key: data.razorpayKeyId,
+        amount: data.order.amount,
+        currency: data.order.currency,
+        name: "SIFI Foundation",
+        description: `${frequency} donation for ${purpose}`,
+        order_id: data.order.id,
+        prefill: { name: user.name, email: user.email, contact: user.phone || "" },
+        handler: async (payment) => {
+          try {
+            const verified = await api("/donations/verify", { method: "POST", body: payment });
+            setMessage(`Thank you. Donation ${verified.donationNumber} has been verified successfully.`);
+          } catch (error) {
+            setMessage(error.message);
+          }
+        },
+        modal: { ondismiss: () => setMessage("Payment was not completed.") },
+        theme: { color: "#176b3a" }
+      });
+      checkout.open();
+    } catch (error) {
+      setMessage(error.message);
+    }
+    return;
     setMessage(`Thank you. Your ${frequency === "one-time" ? "one-time" : "monthly"} pledge of ₹${numericAmount.toLocaleString("en-IN")} for ${purpose} is ready to continue.`);
   };
 
@@ -71,7 +135,7 @@ function DonationPage() {
             <p>As per Indian Income Tax rules, a donor with Indian passport is required to add their Address and PAN number in case they wish to avail the Section 13A (erstwhile Section 80G) tax-exemption certificate.</p>
             <p>No refunds will be entertained after the instant tax exemption has been issued.</p>
           </aside>
-          <button className="donor-login" type="button"><UserRound fill="currentColor" /> Donor Login</button>
+          <a className="donor-login" href={user ? "/admin" : "/login"}><UserRound fill="currentColor" /> {user ? "My Dashboard" : "Donor Login"}</a>
         </div>
       </div>
     </section>

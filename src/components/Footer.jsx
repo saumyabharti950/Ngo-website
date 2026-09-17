@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube } from "react-icons/fa6";
+import { api } from "../lib/api";
 
 const socialLinks = [
   { label: "Facebook", href: "https://www.facebook.com/sififoundation", Icon: FaFacebookF },
@@ -16,6 +18,10 @@ const footerLinks = [
 ];
 
 function Footer() {
+  const [settings, setSettings] = useState(null);
+  useEffect(() => { api("/settings").then(setSettings).catch(() => {}); }, []);
+  const contact = settings?.contact || {};
+  const social = settings?.social || {};
   return (
     <footer className="footer">
       <div className="footer-aurora" aria-hidden="true" />
@@ -25,9 +31,9 @@ function Footer() {
         <section className="footer-brand">
           <a className="footer-logo brand-logo" href="/" aria-label="SIFI Foundation home"><img src="/images/SIFI%20Foundation%20logo.png" alt="SIFI Foundation" /></a>
           <div className="footer-address"><MapPin size={16}/><span>C/22, Patel Park, Harmu Housing Colony,<br/>Ranchi – 834002, Jharkhand, India</span></div>
-          <a className="footer-contact" href="mailto:info@sififoundation.org"><Mail size={16}/> info@sififoundation.org</a>
-          <a className="footer-contact" href="tel:06513591618"><Phone size={16}/> 0651-3591618</a>
-          <div className="footer-social">{socialLinks.map(({ label, href, Icon }) => <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={`Follow SIFI Foundation on ${label}`} title={label}><Icon aria-hidden="true" /></a>)}</div>
+          <a className="footer-contact" href={`mailto:${contact.primary_email || "info@sififoundation.org"}`}><Mail size={16}/> {contact.primary_email || "info@sififoundation.org"}</a>
+          <a className="footer-contact" href={`tel:${contact.phone || "06513591618"}`}><Phone size={16}/> {contact.phone || "0651-3591618"}</a>
+          <div className="footer-social">{socialLinks.map(({ label, href, Icon }) => <a key={label} href={social[label.toLowerCase()] || href} target="_blank" rel="noopener noreferrer" aria-label={`Follow SIFI Foundation on ${label}`} title={label}><Icon aria-hidden="true" /></a>)}</div>
         </section>
 
         {footerLinks.map(({ title, links }) => <section className="footer-column" key={title}><h4>{title}</h4>{links.map(([label, href]) => <a key={label} href={href}>{label}</a>)}</section>)}

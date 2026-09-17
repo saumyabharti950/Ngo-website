@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { api } from "../lib/api";
 
 const pages = {
   "/about-us": {
@@ -44,8 +45,11 @@ const pages = {
 };
 
 function GalleryPage() {
-  const images = ["healthcare.jpg", "education.jpg", "food.jpg", "volunteer.jpg", "elderly.jpg", "hero.jpg"];
-  return <section className="site-page"><div className="container"><div className="page-intro"><span>GALLERY</span><h1>Moments of community action</h1><p>A glimpse of the people, partnerships and purpose behind our work.</p></div><div className="gallery-grid">{images.map((image) => <img key={image} src={`/images/${image}`} alt="SIFI Foundation community work" />)}</div></div></section>;
+  const [items, setItems] = useState([]);
+  useEffect(() => { api("/content/public/gallery").then(setItems).catch(() => setItems([])); }, []);
+  const fallback = ["healthcare.jpg", "education.jpg", "food.jpg", "volunteer.jpg", "elderly.jpg", "hero.jpg"].map((image) => ({ id: image, featuredImage: `/images/${image}`, title: "SIFI Foundation community work" }));
+  const images = items.length ? items : fallback;
+  return <section className="site-page"><div className="container"><div className="page-intro"><span>GALLERY</span><h1>Moments of community action</h1><p>A glimpse of the people, partnerships and purpose behind our work.</p></div><div className="gallery-grid">{images.map((item) => <img key={item.id} src={item.featuredImage || item.image1} alt={item.title} />)}</div></div></section>;
 }
 
 const newPages = {
@@ -57,6 +61,61 @@ const newPages = {
 
 function NewPage({ page }) {
   return <section className="feature-page"><div className="feature-page-orb orb-one" /><div className="feature-page-orb orb-two" /><div className="container feature-page-grid"><div className="feature-page-copy"><span>{page.eyebrow}</span><h1>{page.title}</h1><p>{page.text}</p><a className="btn btn-primary" href={page.eyebrow === "CONTACT SIFI" ? "mailto:info@sififoundation.org" : "/donate"}>{page.eyebrow === "CONTACT SIFI" ? "Email our team" : "Start today"}</a></div><div className="feature-page-image"><img src={`/images/${page.image}`} alt="SIFI Foundation community work" /><div>Community-led<br/><strong>change</strong></div></div></div><div className="container feature-page-cards">{page.cards.map(([title, text], index) => <article key={title}><b>0{index + 1}</b><h2>{title}</h2><p>{text}</p></article>)}</div></section>;
+}
+
+function DynamicContentPage({ module, fallbackPage }) {
+  const [items, setItems] = useState([]);
+  useEffect(() => { api(`/content/public/${module}`).then(setItems).catch(() => setItems([])); }, [module]);
+  if (!items.length) return <NewPage page={fallbackPage} />;
+  const base = module === "programmes" ? "/programmes" : module === "impact_stories" ? "/impact-stories" : module === "blogs" ? "/blog" : "/gallery";
+  return <section className="site-page"><div className="container"><div className="page-intro"><span>{fallbackPage.eyebrow}</span><h1>{fallbackPage.title}</h1><p>{fallbackPage.text}</p></div><div className="page-card-grid">{items.map((item) => <article key={item.id}><h2>{item.title}</h2><p>{item.shortDescription || item.description || item.content}</p>{item.featuredImage && <img src={item.featuredImage} alt={item.title} />}<a className="table-action" href={`${base}/${item.slug}`}>View Details</a></article>)}</div></div></section>;
+}
+
+function DynamicDetailPage({ module, slug }) {
+  const [item, setItem] = useState(null);
+  const [error, setError] = useState("");
+  useEffect(() => { api(`/content/public/${module}/${slug}`).then(setItem).catch((err) => setError(err.message)); }, [module, slug]);
+  if (error) return <section className="site-page"><div className="container"><div className="page-intro"><span>NOT FOUND</span><h1>Content not available</h1><p>{error}</p></div></div></section>;
+  if (!item) return <section className="site-page"><div className="container"><div className="page-intro"><span>LOADING</span><h1>Please wait...</h1></div></div></section>;
+  const images = [item.featuredImage, item.image1, item.image2, item.image3, item.image4].filter(Boolean);
+  return <section className="site-page"><div className="container"><div className="page-intro"><span>{item.module?.replaceAll("_", " ")}</span><h1>{item.title}</h1><p>{item.shortDescription}</p></div>{images.length > 0 && <div className="gallery-grid detail-gallery">{images.map((image) => <img key={image} src={image} alt={item.title} />)}</div>}<article className="admin-card public-detail"><p>{item.description || item.content}</p></article></div></section>;
+}
+
+function ContactPage() {
+  const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
+  const [status, setStatus] = useState("");
+  const update = (event) => setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
+  const submit = async (event) => {
+    event.preventDefault();
+    setStatus("");
+    try {
+      await api("/contact", { method: "POST", body: form });
+      setForm({ name: "", email: "", phone: "", subject: "", message: "" });
+      setStatus("Thank you. Your message has been received.");
+    } catch (error) {
+      setStatus(error.message);
+    }
+  };
+  return (
+    <section className="feature-page contact-form-page">
+      <div className="container feature-page-grid">
+        <div className="feature-page-copy">
+          <span>CONTACT SIFI</span>
+          <h1>Let's make good work possible together.</h1>
+          <p>Reach out about partnerships, volunteering, programmes or community priorities.</p>
+        </div>
+        <form className="contact-form-card" onSubmit={submit}>
+          <label><span>Name</span><input name="name" value={form.name} onChange={update} required /></label>
+          <label><span>Email</span><input name="email" type="email" value={form.email} onChange={update} required /></label>
+          <label><span>Phone</span><input name="phone" value={form.phone} onChange={update} /></label>
+          <label><span>Subject</span><input name="subject" value={form.subject} onChange={update} /></label>
+          <label className="wide"><span>Message</span><textarea name="message" value={form.message} onChange={update} rows="5" required /></label>
+          <button className="btn btn-primary" type="submit">Send Message</button>
+          {status && <p className="form-message">{status}</p>}
+        </form>
+      </div>
+    </section>
+  );
 }
 
 /* ---------- icons used only inside the "what guides us" panel ---------- */
@@ -391,6 +450,16 @@ function AboutPage({ page }) {
 }
 
 function SitePage({ path }) {
+  const [, section, slug] = path.split("/");
+  if (slug && section === "programmes") return <DynamicDetailPage module="programmes" slug={slug} />;
+  if (slug && section === "impact-stories") return <DynamicDetailPage module="impact_stories" slug={slug} />;
+  if (slug && section === "blog") return <DynamicDetailPage module="blogs" slug={slug} />;
+  if (slug && section === "gallery") return <DynamicDetailPage module="gallery" slug={slug} />;
+  if (path === "/programmes") return <DynamicContentPage module="programmes" fallbackPage={{ eyebrow: "OUR WORK", title: pages["/work"].title, text: pages["/work"].text, image: "Takeaction.png", cards: pages["/work"].cards }} />;
+  if (path === "/contact") return <ContactPage />;
+  if (path === "/work") return <DynamicContentPage module="programmes" fallbackPage={{ eyebrow: "OUR WORK", title: pages["/work"].title, text: pages["/work"].text, image: "Takeaction.png", cards: pages["/work"].cards }} />;
+  if (path === "/impact-stories") return <DynamicContentPage module="impact_stories" fallbackPage={{ eyebrow: "IMPACT STORIES", title: pages["/impact-stories"].title, text: pages["/impact-stories"].text, image: "Getinvolbed.png", cards: pages["/impact-stories"].cards }} />;
+  if (path === "/blog") return <DynamicContentPage module="blogs" fallbackPage={newPages["/blog"]} />;
   if (newPages[path]) return <NewPage page={newPages[path]} />;
   if (path === "/gallery") return <GalleryPage />;
   const page = pages[path] || pages["/about-us"];
