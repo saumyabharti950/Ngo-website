@@ -21,11 +21,16 @@ export async function api(path, options = {}) {
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
   const token = tokenStore.get();
   if (token) headers.Authorization = `Bearer ${token}`;
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-    body: options.body && typeof options.body !== "string" ? JSON.stringify(options.body) : options.body
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers,
+      body: options.body && typeof options.body !== "string" ? JSON.stringify(options.body) : options.body
+    });
+  } catch {
+    throw new Error("Unable to reach the API server. Start MySQL and the backend server, then try again.");
+  }
   if (options.raw) return response;
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || payload.success === false) throw new Error(payload.message || "Request failed");
