@@ -4,6 +4,7 @@ import ContentDetailView from "./ContentDetailView";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 import ContentCollection, { collectionThemes } from "./ContentCollection";
+import Campaigns from "./Campaigns";
 
 /* =========================================================================
    CONTENT
@@ -594,6 +595,8 @@ function SitePage({ path, previewContent }) {
     content = <ContactPage />;
   } else if (path === "/blog") {
     content = <DynamicContentPage previewContent={previewContent} module="blogs" fallbackPage={newPages["/blog"]} />;
+  } else if (path === "/campaigns") {
+    content = <Campaigns fullPage />;
   } else if (newPages[path]) {
     content = <NewPage page={newPages[path]} />;
   } else {

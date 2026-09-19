@@ -2,7 +2,6 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import Hero from "./Hero";
 import Stats from "./Stats";
-import Causes from "./Causes";
 import Campaigns from "./Campaigns";
 import ContentSections from "./ContentSections";
 import SitePage from "./SitePage";
@@ -25,7 +24,7 @@ export default function PublicWebsite({ path, previewData }) {
     <main>
       {showSlider && <PageBanner key={`${bannerPath}:${previewData?.activeSlide || 0}`} slides={slider.slides} initialIndex={previewData?.activeSlide || 0} preview={preview} />}
       {previewData?.kind === "content" && previewData.view !== "listing" ? <ContentDetailView item={previewData.item} /> : path === "/" ? <>
-        {!showSlider && <Hero />}<Stats /><Causes /><Campaigns /><ContentSections />
+        {!showSlider && <Hero />}<Stats /><Campaigns /><ContentSections />
       </> : path === "/donate" ? <DonationPage /> : path === "/login" ? <LoginPage /> : <SitePage path={path} previewContent={previewData?.kind === "content" ? previewData.item : undefined} />}
     </main>
     <Footer />
