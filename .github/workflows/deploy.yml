@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Test SSH connection
@@ -24,4 +24,4 @@ jobs:
             echo "Current branch:"
             git branch --show-current
             echo "Current commit:"
-            git log -1 --onelinevfd
+            git log -1 --oneline
