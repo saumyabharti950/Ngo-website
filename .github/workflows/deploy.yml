@@ -24,4 +24,4 @@ jobs:
             echo "Current branch:"
             git branch --show-current
             echo "Current commit:"
-            git log -1 --oneline
+            git log -1 --oneline 
