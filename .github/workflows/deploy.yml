@@ -1,27 +1,23 @@
-name: Deploy SIFI Foundation
+name: Deploy
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Test SSH connection
+      - name: Deploy to server
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
+          port: 22
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            echo "SSH connection successful"
-            whoami
-            pwd
             cd /home/chillymo/sififoundation.org
-            echo "Current branch:"
-            git branch --show-current
-            echo "Current commit:"
-            git log -1 --oneline 
+            git pull origin main
