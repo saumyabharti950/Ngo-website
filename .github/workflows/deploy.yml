@@ -13,51 +13,211 @@ jobs:
     steps:
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.2.2
+
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           port: 22
           key: ${{ secrets.SERVER_SSH_KEY }}
           command_timeout: 15m
+
           script: |
             set -e
 
-            echo "================================="
-            echo "SIFI Foundation Deployment"
-            echo "================================="
+            echo "=========================================="
+            echo "     SIFI FOUNDATION DEPLOYMENT"
+            echo "=========================================="
+
+            # --------------------------------------------------
+            # Node.js
+            # --------------------------------------------------
 
             export PATH="/opt/alt/alt-nodejs22/root/usr/bin:$PATH"
             export RAYON_NUM_THREADS=1
+            export NODE_OPTIONS="--max-old-space-size=512"
+
+            echo "Node version:"
+            node -v
+
+            echo "NPM version:"
+            npm -v
+
+            # --------------------------------------------------
+            # Project directory
+            # --------------------------------------------------
 
             cd /home/chillymo/sififoundation.org
 
-            echo "Current branch:"
-            git branch --show-current
+            echo "Project directory:"
+            pwd
 
-            echo "Current commit before pull:"
+            echo "Current server commit:"
             git log -1 --oneline
 
-            echo "Pulling latest code..."
+            # --------------------------------------------------
+            # Preserve production ENV files
+            # --------------------------------------------------
+
+            echo "Backing up production environment files..."
+
+            cp .env /tmp/sifi-root.env.backup
+            cp backend/.env /tmp/sifi-backend.env.backup
+
+            # --------------------------------------------------
+            # Remove live-generated frontend changes
+            # before Git pull
+            # --------------------------------------------------
+
+            echo "Cleaning generated frontend files..."
+
+            git restore -- index.html || true
+
+            # --------------------------------------------------
+            # Pull latest GitHub code
+            # --------------------------------------------------
+
+            echo "Pulling latest code from GitHub..."
+
             git pull --ff-only origin main
 
-            echo "Latest commit:"
+            echo "Latest server commit:"
             git log -1 --oneline
 
-            echo "Building frontend..."
+            # --------------------------------------------------
+            # Restore production ENV files
+            # --------------------------------------------------
+
+            echo "Restoring production environment files..."
+
+            cp /tmp/sifi-root.env.backup .env
+            cp /tmp/sifi-backend.env.backup backend/.env
+
+            # --------------------------------------------------
+            # Verify environment files exist
+            # --------------------------------------------------
+
+            test -f .env
+            test -f backend/.env
+
+            echo "Production environment files OK."
+
+            # --------------------------------------------------
+            # Frontend dependencies
+            # --------------------------------------------------
+
+            echo "=========================================="
+            echo "Installing frontend dependencies..."
+            echo "=========================================="
+
+            npm ci
+
+            # --------------------------------------------------
+            # Frontend build
+            # --------------------------------------------------
+
+            echo "=========================================="
+            echo "Building React frontend..."
+            echo "=========================================="
+
             npm run build
 
             echo "Frontend build completed."
 
+            # --------------------------------------------------
+            # Publish Vite dist to live website root
+            # --------------------------------------------------
+
+            echo "=========================================="
+            echo "Publishing frontend..."
+            echo "=========================================="
+
+            # Remove old generated assets
+            rm -rf assets
+
+            # Copy new production build
+            cp -a dist/index.html ./index.html
+            cp -a dist/assets ./assets
+
+            echo "Frontend published successfully."
+
+            # --------------------------------------------------
+            # Verify frontend
+            # --------------------------------------------------
+
+            echo "Live index.html:"
+            ls -lh index.html
+
+            echo "Live assets:"
+            ls -lah assets/
+
+            # --------------------------------------------------
+            # Restore SPA .htaccess if it exists in Git
+            # --------------------------------------------------
+
+            if [ -f .htaccess ]; then
+                echo ".htaccess found."
+            else
+                echo "Creating SPA .htaccess..."
+
+                cat > .htaccess <<'EOF'
+            RewriteEngine On
+
+            RewriteCond %{REQUEST_FILENAME} -f [OR]
+            RewriteCond %{REQUEST_FILENAME} -d
+            RewriteRule ^ - [L]
+
+            RewriteRule ^ index.html [L]
+            EOF
+
+            fi
+
+            # --------------------------------------------------
+            # Backend
+            # --------------------------------------------------
+
+            echo "=========================================="
             echo "Updating backend..."
+            echo "=========================================="
+
             cd /home/chillymo/sififoundation.org/backend
 
             echo "Installing backend production dependencies..."
+
             npm ci --omit=dev
 
+            # --------------------------------------------------
+            # Restart Node.js application
+            # --------------------------------------------------
+
             echo "Restarting Node application..."
+
             mkdir -p tmp
             touch tmp/restart.txt
 
-            echo "================================="
-            echo "DEPLOYMENT SUCCESSFUL"
-            echo "================================="
+            # --------------------------------------------------
+            # Final verification
+            # --------------------------------------------------
+
+            cd /home/chillymo/sififoundation.org
+
+            echo "=========================================="
+            echo "FINAL DEPLOYMENT INFORMATION"
+            echo "=========================================="
+
+            echo "Deployed commit:"
+            git log -1 --oneline
+
+            echo "Frontend index:"
+            ls -lh index.html
+
+            echo "Frontend assets:"
+            ls -lh assets/
+
+            echo "Backend:"
+            cd backend
+            test -f .env
+            echo "Backend environment: OK"
+
+            echo "=========================================="
+            echo "     DEPLOYMENT SUCCESSFUL"
+            echo "=========================================="
