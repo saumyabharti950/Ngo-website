@@ -56,7 +56,7 @@ export default function Hero() {
       <div className="bsf-cinema-lines" aria-hidden="true" />
       <div className="bsf-hero-shell">
         <div className="bsf-hero-copy">
-          <span className="bsf-mini bsf-rise">FOR EVERY CHILD, FAMILY AND COMMUNITY</span>
+          <span className="bsf-mini bsf-rise">FOR EVERY CHIL, FAMILY AND COMMUNITY</span>
           <h1 className="bsf-rise" style={{ "--d": "70ms" }}>Empowerings Underprivileged Children</h1>
           <p className="bsf-hero-desc bsf-rise" style={{ "--d": "150ms" }}>
             {general.website_description || "Creating opportunities through healthcare, education, livelihoods and community-led development programmes."}
