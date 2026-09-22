@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy SIFI Foundation
 
 on:
   push:
@@ -18,6 +18,36 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           port: 22
           key: ${{ secrets.SERVER_SSH_KEY }}
+          command_timeout: 10m
           script: |
+            set -e
+
+            echo "SSH connection successful"
+
             cd /home/chillymo/sififoundation.org
+
+            echo "Current branch:"
+            git branch --show-current
+
+            echo "Pulling latest code..."
             git pull origin main
+
+            echo "Installing frontend dependencies..."
+            export PATH="/opt/alt/alt-nodejs22/root/usr/bin:$PATH"
+            export RAYON_NUM_THREADS=1
+
+            npm ci
+
+            echo "Building frontend..."
+            npm run build
+
+            echo "Updating backend..."
+            cd /home/chillymo/sififoundation.org/backend
+
+            npm ci --omit=dev
+
+            echo "Restarting Node application..."
+            mkdir -p tmp
+            touch tmp/restart.txt
+
+            echo "Deployment completed successfully."
