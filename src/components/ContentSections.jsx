@@ -15,8 +15,19 @@ const journey = [
   ["Elevate & Feed Relief", "Built programmes around health, learning, livelihoods and food security."],
 ];
 
-const leaders = ["Neeraj Kumar", "Sharvan Kumar", "Rajan Kumar", "Kishan Bhukla", "Sandeep Kumar", "Sourya"];
+const leaders = [
+  { name: "Madhu Priya Soni", role: "Director" },
+  { name: "Mithilesh Pratap Singh", role: "Director", image: "/images/Mithilesh Pratap Singh, Director.jpeg" },
+  { name: "Kunal Singh Rana", role: "Director" },
+  { name: "Niraj Kumar", role: "Advisor" },
+  { name: "MP Ajmera", role: "Retd. IAS, Advisor" },
+  { name: "Sunil Mishra", role: "Lead, PR & Communication" },
+  { name: "Vivek Pratap Singh", role: "Projects Coordinator", image: "/images/Vivek Pratap Singh,  Projects Coordinator.jpeg" },
+  { name: "Anirban Choudhary", role: "Liaison Officer" },
+  { name: "Saumya Bharti", role: "Executive - Developer", image: "/images/Saumya Bharti, Executive - Developer.jpeg" },
+];
 const volunteers = ["Vikash Kumar", "Raja Kumar", "Sita", "Akash Jain", "Muskan"];
+const fallbackAvatar = "/images/dummy.png";
 
 const faqs = [
   ["Are donations tax exempt?", "Donation receipts and applicable exemption details are shared according to the Foundation's current compliance status."],
@@ -75,15 +86,15 @@ function Heading({ label, title, text }) {
   );
 }
 
-function AvatarCard({ name, index, type = "leader" }) {
+function AvatarCard({ name, role, image, index, type = "leader" }) {
   return (
     <article className={`avatar-card ${type}`} style={{ "--d": `${index * 70}ms` }}>
       <div className="avatar-photo">
-        <img src={index % 2 ? "/images/About.png" : "/images/volunteer.jpg"} alt={name} />
+        <img src={image || fallbackAvatar} alt={name} />
         <span><BadgeCheck size={13} /></span>
       </div>
       <h3>{name}</h3>
-      <p>{type === "leader" ? "Core Team" : "Verified Volunteer"}</p>
+      <p>{role || (type === "leader" ? "Core Team" : "Verified Volunteer")}</p>
     </article>
   );
 }
@@ -149,7 +160,7 @@ export default function ContentSections() {
         <div className="home-shell">
           <Heading label="OUR TRUSTED TEAM" title="Meet Our Core Leadership & Team" text="A committed group working across planning, field action, partnerships and governance." />
           <div className="avatar-row">
-            {leaders.map((name, index) => <AvatarCard key={name} name={name} index={index} />)}
+            {leaders.map((member, index) => <AvatarCard key={member.name} {...member} index={index} />)}
           </div>
         </div>
       </section>
