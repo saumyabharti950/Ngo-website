@@ -5,19 +5,19 @@ const campaignTabs = ["All", "Child Education", "Health", "Food", "Women", "Emer
 
 const campaignItems = [
   ["Child Education", "/images/Takeaction.png", "Sponsor School Essentials For Children", "Education kits, books and learning support for children who need a stronger start.", "Support now", 74],
-  ["Child Education", "/images/education.jpg", "Digital Learning Corners", "Help set up guided digital learning spaces with tablets, worksheets and mentor support.", "Sponsor learning", 66],
+  ["Child Education", "/images/digital-learning-corners.jpg", "Digital Learning Corners", "Help set up guided digital learning spaces with tablets, worksheets and mentor support.", "Sponsor learning", 66],
   ["Child Education", "/images/about1.png", "Back To School Bridge Classes", "Support children who need remedial lessons, reading practice and confidence after learning gaps.", "Help children", 82],
   ["Health", "/images/About.png", "Serve A Day, Serve A Dream", "Help field teams deliver health awareness, basic screenings and care in local communities.", "Join campaign", 72],
-  ["Health", "/images/healthcare.jpg", "Mobile Health Camp Support", "Contribute to community checkups, doctor consultations and follow-up guidance for families.", "Support care", 68],
+  ["Health", "/images/mobile-health-camp-support.jpg", "Mobile Health Camp Support", "Contribute to community checkups, doctor consultations and follow-up guidance for families.", "Support care", 68],
   ["Health", "/images/about2.png", "Nutrition And Wellness Drive", "Back practical nutrition counselling, hygiene awareness and family health sessions.", "Donate today", 79],
-  ["Food", "/images/food.jpg", "Community Meal Support", "Provide nutritious meals and grocery support for children, elders and vulnerable households.", "Feed families", 85],
-  ["Food", "/images/hero.jpg", "Festival Food Kits", "Help distribute essential ration kits during high-need seasons and community drives.", "Sponsor kits", 63],
+  ["Food", "/images/community-meal-support.png", "Community Meal Support", "Provide nutritious meals and grocery support for children, elders and vulnerable households.", "Feed families", 85],
+  ["Food", "/images/festival-food-kits.png", "Festival Food Kits", "Help distribute essential ration kits during high-need seasons and community drives.", "Sponsor kits", 63],
   ["Food", "/images/cover.png", "No Child Sleeps Hungry", "Support emergency meal response for children and families facing food insecurity.", "Give meals", 91],
   ["Women", "/images/Getinvolbed.png", "Women's Skill Circles", "Fund practical training, mentoring and basic livelihood tools for women-led progress.", "Empower women", 71],
-  ["Women", "/images/volunteer.jpg", "Health, Rights And Confidence", "Support awareness meetings on health, dignity, safety and financial literacy.", "Stand with her", 69],
+  ["Women", "/images/health-rights-confidence.png", "Health, Rights And Confidence", "Support awareness meetings on health, dignity, safety and financial literacy.", "Stand with her", 69],
   ["Women", "/images/about3.png", "Micro Enterprise Starter Support", "Help women start small income activities through training, guidance and starter material.", "Start change", 76],
   ["Emergency", "/images/Contact.png", "First Aid And Care Children Help", "Back emergency support, healthcare access and dignity-first community care.", "Donate today", 78],
-  ["Emergency", "/images/elderly.jpg", "Relief For Elderly Families", "Support urgent assistance, food, medicine and care coordination for elderly community members.", "Send relief", 65],
+  ["Emergency", "/images/relief-for-elderly-families.png", "Relief For Elderly Families", "Support urgent assistance, food, medicine and care coordination for elderly community members.", "Send relief", 65],
   ["Emergency", "/images/Blog.png", "Rapid Response Community Fund", "Create a flexible support pool for urgent field needs, local crises and immediate outreach.", "Respond now", 88],
 ];
 
@@ -47,7 +47,7 @@ export default function Campaigns({ fullPage = false }) {
           {visibleCampaigns.map(([category, image, title, text, cta, progress], index) => (
             <article className="bsf-campaign-card" style={{ "--d": `${index * 90}ms` }} key={title}>
               <div className="bsf-campaign-media">
-                <img src={image} alt={title} />
+                <img className={title === "Festival Food Kits" ? "bsf-campaign-image-contain" : ""} src={image} alt={title} />
                 <span><Heart size={12} fill="currentColor" /> {category}</span>
               </div>
               <div className="bsf-campaign-body">
@@ -82,8 +82,9 @@ export default function Campaigns({ fullPage = false }) {
         .bsf-campaigns-page .bsf-campaign-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); }
         .bsf-campaign-card{ overflow:hidden; border-radius:8px; border:1px solid rgba(255,255,255,.74); background:rgba(255,255,255,.9); box-shadow:0 18px 42px rgba(16,28,58,.1); opacity:0; transform:translateY(34px) rotateX(5deg); animation:bsfCampaignIn .9s cubic-bezier(.19,1,.22,1) var(--d,0s) forwards; transition:transform .28s ease, box-shadow .28s ease; backdrop-filter:blur(10px); }
         .bsf-campaign-card:hover{ transform:translateY(-5px); box-shadow:0 22px 42px rgba(16,28,58,.14); }
-        .bsf-campaign-media{ position:relative; height:170px; overflow:hidden; }
+        .bsf-campaign-media{ position:relative; height:170px; overflow:hidden; background:#fff; }
         .bsf-campaign-media img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .55s ease; }
+        .bsf-campaign-media img.bsf-campaign-image-contain{ object-fit:contain; background:#fff; }
         .bsf-campaign-card:hover img{ transform:scale(1.06); }
         .bsf-campaign-media span{ position:absolute; top:12px; right:12px; display:inline-flex; align-items:center; gap:5px; padding:6px 9px; border-radius:999px; background:#05b36b; color:#fff; font-size:10px; font-weight:900; }
         .bsf-campaign-body{ padding:18px; }
