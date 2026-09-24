@@ -61,3 +61,4 @@ export default function GalleryEditor({ modal, close, done }) {
     </div><WebsitePreview payload={preview} title="Gallery website preview"/></div>
   </section></div>;
 }
+
