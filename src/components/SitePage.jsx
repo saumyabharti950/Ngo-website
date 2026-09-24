@@ -287,13 +287,14 @@ function NewPage({ page }) {
 }
 
 /* =========================================================================
-   ABOUT PAGE — CINEMATIC EDITION
-   Palette: night-green (#050D0A) + teal + marigold + clay + dusk-violet
-   Effects: fixed aurora backdrop, floating SVG particles, film grain,
-            vignette, letterbox open, sunrise horizon, parallax, cursor light
+   ABOUT PAGE — REFINED CINEMATIC EDITION
+   Direction: documentary film. Kam colors, dheemi motion, ek yaadgaar moment.
+   Palette : night-forest + bone cream + brass, sage aur clay sirf accent me
+   Signature: topographic contour lines jo khud draw hoti hain (zameen / community map),
+              scroll ke saath jalte statement words, aperture-open hero image
    ========================================================================= */
 
-/* Focus areas — about text me jo areas likhe hain wahi yahan marquee me chalte hain */
+/* Focus areas — about text me jo areas likhe hain wahi yahan index me aate hain */
 const FOCUS_AREAS = [
   "Healthcare and public health",
   "Education and digital learning",
@@ -307,31 +308,70 @@ const FOCUS_AREAS = [
   "Research and social impact assessment",
 ];
 
-/* Particles ko seeded random se banate hain taaki har render pe same rahein (no flicker) */
-function makeParticles(count) {
-  let seed = 11;
-  const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    left: rnd() * 100,
-    size: 9 + rnd() * 24,
-    duration: 18 + rnd() * 24,
-    delay: -rnd() * 34, // negative delay: page open hote hi poori screen me particles dikhen
-    drift: (rnd() - 0.5) * 240,
-    rot: (rnd() - 0.5) * 600,
-    kind: i % 4,
-    tone: i % 5,
-    twinkle: 3 + (i % 5),
-  }));
-}
-const PARTICLES = makeParticles(44);
+/* Right side ka chapter rail */
+const RAIL = [
+  ["sa-ch0", "Overview"],
+  ["sa-ch1", "Who we are"],
+  ["sa-ch2", "Our work"],
+  ["sa-ch3", "Our belief"],
+  ["sa-ch4", "What guides us"],
+  ["sa-ch5", "Join us"],
+];
 
-function ParticleShape({ kind }) {
-  if (kind === 0) return (<><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".18" /><circle cx="12" cy="12" r="4" fill="currentColor" /></>);
-  if (kind === 1) return <path d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16Z" fill="currentColor" />; // patta / leaf
-  if (kind === 2) return <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z" fill="currentColor" />; // chamak / spark
-  return <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="1.5" />; // ring
+/* ---------- Contour lines: har ring ka aakar sin waves se thoda tedha-medha ---------- */
+function contourPath(cx, cy, R, k) {
+  const n = 160;
+  let d = "";
+  for (let i = 0; i <= n; i++) {
+    const t = (i / n) * Math.PI * 2;
+    const w = 1 + 0.09 * Math.sin(3 * t + k * 0.55) + 0.05 * Math.sin(5 * t - k * 0.8) + 0.025 * Math.sin(9 * t + k * 1.3);
+    const x = cx + Math.cos(t) * R * w * 1.25;
+    const y = cy + Math.sin(t) * R * w * 0.8;
+    d += `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
+  }
+  return `${d}Z`;
 }
+
+const CONTOURS = [
+  ...Array.from({ length: 16 }, (_, k) => ({ d: contourPath(1180, 380, 38 + k * 34, k), accent: k % 5 === 0 })),
+  ...Array.from({ length: 11 }, (_, k) => ({ d: contourPath(260, 820, 30 + k * 40, k + 20), accent: k % 5 === 0 })),
+].map((c, i) => ({ ...c, delay: 0.3 + i * 0.09 }));
+
+function ContourField() {
+  return (
+    <svg className="sa-contours" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <g className="sa-contour-g">
+        {CONTOURS.map((c, i) => (
+          <path key={i} className={`sa-c${c.accent ? " sa-c--accent" : ""}`} pathLength="1" d={c.d} style={{ animationDelay: `${c.delay}s` }} />
+        ))}
+      </g>
+      {/* location pin — Ranchi ka ishara, ek hi dheema ripple */}
+      <circle className="sa-ping" cx="1180" cy="380" r="8" />
+      <circle cx="1180" cy="380" r="3.2" fill="#D9A54B" />
+    </svg>
+  );
+}
+
+/* ---------- Dust motes + bokeh: chhote, dheere, kam ---------- */
+function makeParticles(count) {
+  let seed = 23;
+  const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+  return Array.from({ length: count }, (_, i) => {
+    const bokeh = i % 7 === 0;
+    return {
+      id: i,
+      bokeh,
+      left: rnd() * 100,
+      size: bokeh ? 28 + rnd() * 40 : 2 + rnd() * 3.5,
+      duration: bokeh ? 80 + rnd() * 40 : 44 + rnd() * 40,
+      delay: -rnd() * 90, // negative delay: page khulte hi particles pehle se hawa me hon
+      drift: (rnd() - 0.5) * 120,
+      tone: i % 3,
+      twinkle: 4 + rnd() * 5,
+    };
+  });
+}
+const PARTICLES = makeParticles(30);
 
 function ParticleField() {
   return (
@@ -339,135 +379,47 @@ function ParticleField() {
       {PARTICLES.map((p) => (
         <span
           key={p.id}
-          className={`sa-p sa-t${p.tone}`}
-          style={{
-            left: `${p.left}%`,
-            width: p.size,
-            height: p.size,
-            animationDuration: `${p.duration}s`,
-            animationDelay: `${p.delay}s`,
-            "--drift": `${p.drift}px`,
-            "--rot": `${p.rot}deg`,
-          }}
+          className={`sa-p sa-t${p.tone}${p.bokeh ? " sa-p--bokeh" : ""}`}
+          style={{ left: `${p.left}%`, width: p.size, height: p.size, animationDuration: `${p.duration}s`, animationDelay: `${p.delay}s`, "--drift": `${p.drift}px` }}
         >
-          <svg viewBox="0 0 24 24" style={{ animationDuration: `${p.twinkle}s` }}><ParticleShape kind={p.kind} /></svg>
+          <svg viewBox="0 0 24 24" style={{ animationDuration: `${p.twinkle}s` }}>
+            {p.bokeh ? (
+              <>
+                <circle cx="12" cy="12" r="11" fill="currentColor" opacity=".09" />
+                <circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" strokeWidth=".6" opacity=".4" />
+              </>
+            ) : (
+              <>
+                <circle cx="12" cy="12" r="10" fill="currentColor" opacity=".2" />
+                <circle cx="12" cy="12" r="3.4" fill="currentColor" />
+              </>
+            )}
+          </svg>
         </span>
       ))}
     </div>
   );
 }
 
-/* Hero ke neeche sunrise + hills + udte panchi (SVG) */
-function HorizonScene() {
-  const rays = Array.from({ length: 16 }, (_, i) => i * 22.5);
-  return (
-    <svg className="sa-horizon" viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-      <defs>
-        <radialGradient id="saSunGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0" stopColor="#FFD98A" stopOpacity=".95" />
-          <stop offset=".35" stopColor="#F2A93B" stopOpacity=".5" />
-          <stop offset="1" stopColor="#E8734C" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="saSunBody" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#FFE3A3" />
-          <stop offset="1" stopColor="#F2A93B" />
-        </linearGradient>
-        <linearGradient id="saHillA" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#33C2AE" stopOpacity=".55" />
-          <stop offset="1" stopColor="#0B1F1A" />
-        </linearGradient>
-        <linearGradient id="saHillB" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#1F6F63" />
-          <stop offset="1" stopColor="#07140F" />
-        </linearGradient>
-        <linearGradient id="saHillC" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#0C1D18" />
-          <stop offset="1" stopColor="#050D0A" />
-        </linearGradient>
-      </defs>
-
-      <circle className="sa-sun-glow" cx="720" cy="215" r="260" fill="url(#saSunGlow)" />
-      <g className="sa-rays" stroke="#FFD98A" strokeWidth="2" strokeLinecap="round" opacity=".55">
-        {rays.map((deg) => (
-          <line key={deg} x1="720" y1="95" x2="720" y2={deg % 45 === 0 ? 52 : 70} transform={`rotate(${deg} 720 215)`} />
-        ))}
-      </g>
-      <circle cx="720" cy="215" r="70" fill="url(#saSunBody)" />
-
-      <g className="sa-hill sa-hill--a"><path d="M0 250C180 190 340 210 520 245S860 290 1040 235 1320 200 1440 240V420H0Z" fill="url(#saHillA)" /></g>
-      <g className="sa-hill sa-hill--b"><path d="M0 300C220 250 420 285 640 300S1020 330 1220 280 1380 265 1440 285V420H0Z" fill="url(#saHillB)" /></g>
-      <g className="sa-hill sa-hill--c"><path d="M0 350C240 320 460 345 720 355S1180 340 1440 332V420H0Z" fill="url(#saHillC)" /></g>
-
-      {[[70, "0s", 26], [150, "-6s", 30], [110, "-13s", 34]].map(([y, delay, dur], i) => (
-        <g key={i} className="sa-bird" style={{ "--by": `${y}px`, animationDelay: delay, animationDuration: `${dur}s` }}>
-          <path className="sa-wing" d="M0 0Q6 -8 12 0Q18 -8 24 0" fill="none" stroke="#FBF7EF" strokeWidth="1.6" strokeLinecap="round" />
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-/* Community network — nodes aur links jo pulse karte hain */
-const NET_NODES = [[200, 150, 9], [90, 70, 5], [310, 60, 6], [345, 195, 5], [110, 240, 6], [255, 260, 5], [38, 160, 4]];
-const NET_LINKS = [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [1, 6], [6, 4], [2, 3], [3, 5]];
-
-function NetworkArt({ className = "" }) {
-  return (
-    <svg className={`sa-net ${className}`} viewBox="0 0 400 300" aria-hidden="true">
-      {NET_LINKS.map(([a, b], i) => (
-        <line key={i} className="sa-net-line" x1={NET_NODES[a][0]} y1={NET_NODES[a][1]} x2={NET_NODES[b][0]} y2={NET_NODES[b][1]} style={{ animationDelay: `${i * -0.7}s` }} />
-      ))}
-      <circle className="sa-ripple" cx="200" cy="150" r="14" />
-      <circle className="sa-ripple sa-ripple--2" cx="200" cy="150" r="14" />
-      {NET_NODES.map(([x, y, r], i) => (
-        <g key={i}>
-          <circle className="sa-node-halo" cx={x} cy={y} r={r * 2.2} style={{ animationDelay: `${i * -0.5}s` }} />
-          <circle className={`sa-node sa-node--${i % 3}`} cx={x} cy={y} r={r} />
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-/* Ghumte hue orbit rings — image ke peeche */
-function OrbitRings({ className = "" }) {
-  return (
-    <svg className={`sa-orbits ${className}`} viewBox="0 0 500 500" aria-hidden="true">
-      <circle className="sa-ring sa-ring--1" cx="250" cy="250" r="232" />
-      <circle className="sa-ring sa-ring--2" cx="250" cy="250" r="200" />
-      <g className="sa-orbit sa-orbit--1"><circle cx="250" cy="18" r="6" fill="#F2A93B" /><circle cx="250" cy="18" r="12" fill="#F2A93B" opacity=".25" /></g>
-      <g className="sa-orbit sa-orbit--2"><circle cx="250" cy="50" r="5" fill="#33C2AE" /><circle cx="250" cy="50" r="10" fill="#33C2AE" opacity=".25" /></g>
-    </svg>
-  );
-}
-
-/* Cinematic frame — viewfinder corners + REC tag + light sweep */
-function Shot({ src, alt, tag, className = "" }) {
-  return (
-    <div className={`sa-frame ${className}`}>
-      <div className="sa-shot">
-        <img src={src} alt={alt} />
-        <span className="sa-rec"><i />{tag}</span>
-      </div>
-      <b className="sa-corner sa-corner--tl" /><b className="sa-corner sa-corner--tr" />
-      <b className="sa-corner sa-corner--bl" /><b className="sa-corner sa-corner--br" />
-    </div>
-  );
-}
-
 function Kicker({ no, children }) {
   return (
-    <p className="sa-kicker"><span className="sa-kicker-dot" aria-hidden="true" />{no ? <em>Scene {no}</em> : null}<span>{children}</span></p>
+    <p className="sa-kicker">
+      <i className="sa-k-line" aria-hidden="true" />
+      {no ? <em>{no}</em> : null}
+      <span>{children}</span>
+    </p>
   );
 }
 
-/* Value icons — stroke draw animation ke liye pathLength="1" */
+/* Value icons — patli line, reveal hone par ek baar draw hoti hai */
 const VALUE_ICONS = [
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" key="i0"><path pathLength="1" d="M4 17h16M6.5 17a5.5 5.5 0 0 1 11 0" strokeLinecap="round" /><path pathLength="1" d="M12 4v3M6 7l1.8 1.8M18 7l-1.8 1.8" strokeLinecap="round" /></svg>,
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" key="i1"><circle pathLength="1" cx="12" cy="12" r="7.2" /><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" /><path pathLength="1" d="M12 2.8v2.4M21.2 12h-2.4" strokeLinecap="round" /></svg>,
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" key="i2"><path pathLength="1" d="M5 19C5 10 11 5 20 5c0 9-5 15-14 15Z" strokeLinejoin="round" /><path pathLength="1" d="M6 18C9 13 12 10 17 7" strokeLinecap="round" /></svg>,
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" key="i3"><circle pathLength="1" cx="9" cy="12" r="5.4" /><circle pathLength="1" cx="15" cy="12" r="5.4" /></svg>,
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.1" key="i0"><path pathLength="1" d="M4 17h16M6.5 17a5.5 5.5 0 0 1 11 0" strokeLinecap="round" /><path pathLength="1" d="M12 4v3M6 7l1.8 1.8M18 7l-1.8 1.8" strokeLinecap="round" /></svg>,
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.1" key="i1"><circle pathLength="1" cx="12" cy="12" r="7.2" /><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" /><path pathLength="1" d="M12 2.8v2.4M21.2 12h-2.4" strokeLinecap="round" /></svg>,
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.1" key="i2"><path pathLength="1" d="M5 19C5 10 11 5 20 5c0 9-5 15-14 15Z" strokeLinejoin="round" /><path pathLength="1" d="M6 18C9 13 12 10 17 7" strokeLinecap="round" /></svg>,
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.1" key="i3"><circle pathLength="1" cx="9" cy="12" r="5.4" /><circle pathLength="1" cx="15" cy="12" r="5.4" /></svg>,
 ];
+
+const ROMAN = ["I", "II", "III", "IV", "V"];
 
 function AboutPage({ page }) {
   const rootRef = useRef(null);
@@ -476,18 +428,47 @@ function AboutPage({ page }) {
     const root = rootRef.current;
     if (!root) return undefined;
 
-    /* Scroll: parallax (--sy) aur progress bar (--progress) — rAF se throttle */
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const words = Array.from(root.querySelectorAll(".sa-w"));
+    const statement = root.querySelector(".sa-statement");
+    const pars = Array.from(root.querySelectorAll(".sa-par"));
+    const railButtons = Array.from(root.querySelectorAll(".sa-rail button"));
+    let lastOn = -1;
     let raf = 0;
+
+    /* Ek hi rAF loop: progress, parallax aur statement words teeno yahin update hote hain */
     const update = () => {
       raf = 0;
+      const vh = window.innerHeight;
       const y = window.scrollY;
-      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const max = document.documentElement.scrollHeight - vh;
       root.style.setProperty("--sy", y.toFixed(1));
       root.style.setProperty("--progress", (max > 0 ? Math.min(1, y / max) : 0).toFixed(4));
+
+      if (!reduce) {
+        pars.forEach((el) => {
+          const box = el.closest(".sa-photo, .sa-band-media");
+          if (!box) return;
+          const r = box.getBoundingClientRect();
+          if (r.bottom < -200 || r.top > vh + 200) return;
+          const off = (r.top + r.height / 2 - vh / 2) * Number(el.dataset.speed || 0.08);
+          el.style.translate = `0 ${(-off).toFixed(1)}px`;
+        });
+      }
+
+      if (statement) {
+        const r = statement.getBoundingClientRect();
+        const p = Math.min(1, Math.max(0, (vh * 0.8 - r.top) / (vh * 0.3 + r.height)));
+        const on = reduce ? words.length : Math.round(p * words.length);
+        if (on !== lastOn) {
+          words.forEach((w, i) => w.classList.toggle("on", i < on));
+          lastOn = on;
+        }
+      }
     };
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
 
-    /* Mouse: hero tilt (--mx, --my) aur cursor ki roshni (--cx, --cy) */
+    /* Mouse: halki depth (--mx, --my) aur cursor ki dheemi roshni (--cx, --cy) */
     const onMove = (e) => {
       root.style.setProperty("--mx", (e.clientX / window.innerWidth - 0.5).toFixed(3));
       root.style.setProperty("--my", (e.clientY / window.innerHeight - 0.5).toFixed(3));
@@ -500,28 +481,44 @@ function AboutPage({ page }) {
     window.addEventListener("resize", onScroll);
     window.addEventListener("mousemove", onMove, { passive: true });
 
-    /* Reveal: element screen me aate hi .is-in lagta hai */
-    const observer = new IntersectionObserver(
+    /* Reveal: screen me aate hi .is-in */
+    const reveal = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("is-in");
-            observer.unobserve(entry.target);
+            reveal.unobserve(entry.target);
           }
         });
       },
       { threshold: 0.15 }
     );
-    root.querySelectorAll(".sa-reveal").forEach((el) => observer.observe(el));
+    root.querySelectorAll(".sa-reveal").forEach((el) => reveal.observe(el));
+
+    /* Chapter rail: jo section beech screen me ho, uska dot active */
+    const chapters = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const idx = Number(entry.target.dataset.ch);
+          railButtons.forEach((b, i) => b.classList.toggle("is-active", i === idx));
+        });
+      },
+      { rootMargin: "-45% 0px -50% 0px" }
+    );
+    root.querySelectorAll("[data-ch]").forEach((el) => chapters.observe(el));
 
     return () => {
       if (raf) cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       window.removeEventListener("mousemove", onMove);
-      observer.disconnect();
+      reveal.disconnect();
+      chapters.disconnect();
     };
   }, []);
+
+  const go = (id) => rootRef.current?.querySelector(`#${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   /* Card ke andar cursor ki spotlight */
   const spot = (event) => {
@@ -531,157 +528,169 @@ function AboutPage({ page }) {
   };
 
   const paragraphs = page.text.split("\n\n");
-  const rowA = [...FOCUS_AREAS, ...FOCUS_AREAS];
-  const rowB = [...FOCUS_AREAS].reverse();
-  const rowBLoop = [...rowB, ...rowB];
+  const statementWords = paragraphs[1].split(" ");
 
   return (
     <section ref={rootRef} className="sifi-about">
-      {/* ---------- fixed cinematic backdrop: poore page pe rehta hai ---------- */}
+      {/* ---------- fixed backdrop: poore page pe ---------- */}
       <div className="sa-backdrop" aria-hidden="true">
-        <div className="sa-aurora sa-aurora--a" />
-        <div className="sa-aurora sa-aurora--b" />
-        <div className="sa-aurora sa-aurora--c" />
-        <div className="sa-aurora sa-aurora--d" />
+        <div className="sa-blob sa-blob--a" />
+        <div className="sa-blob sa-blob--b" />
+        <div className="sa-blob sa-blob--c" />
+        <ContourField />
+        <div className="sa-shaft sa-shaft--1" />
+        <div className="sa-shaft sa-shaft--2" />
+        <div className="sa-shaft sa-shaft--3" />
         <div className="sa-dusk" />
         <div className="sa-spot" />
         <ParticleField />
       </div>
       <div className="sa-vignette" aria-hidden="true" />
       <div className="sa-grain" aria-hidden="true" />
-      <div className="sa-progress" aria-hidden="true" />
+      <div className="sa-open" aria-hidden="true" />
 
-      {/* ---------------- Scene 01 : hero ---------------- */}
-      <div className="sa-hero">
-        <div className="sa-bar sa-bar--t" aria-hidden="true" />
-        <div className="sa-bar sa-bar--b" aria-hidden="true" />
-        <div className="sa-leak" aria-hidden="true" />
-        <HorizonScene />
-
-        <div className="sa-hero-inner">
-          <div className="sa-hero-copy">
-            <Kicker no="01">About SIFI Foundation</Kicker>
-            <h1 className="sa-hero-title" aria-label={page.title}>
-              {page.title.split(" ").map((word, i) => (
-                <span className="sa-word" key={`${word}-${i}`} aria-hidden="true">
-                  <span style={{ animationDelay: `${0.55 + i * 0.09}s, 0s` }}>{word}</span>
-                </span>
-              ))}
-            </h1>
-            <p className="sa-lead">{paragraphs[0]}</p>
-            <div className="sa-actions">
-              <a className="sa-btn sa-btn--gold" href="/donate">Support our work</a>
-              <a className="sa-btn sa-btn--ghost" href="/reach">Get in touch</a>
-            </div>
-          </div>
-
-          <div className="sa-hero-visual">
-            <OrbitRings />
-            <div className="sa-tilt">
-              <Shot className="sa-frame--hero" src="/images/about1.png" alt="SIFI Foundation working alongside communities" tag="SIFI Foundation" />
-              <span className="sa-chip sa-chip--a">Section 8 not-for-profit</span>
-              <span className="sa-chip sa-chip--b">Ranchi, Jharkhand</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="sa-scroll" aria-hidden="true"><i /></div>
-      </div>
-
-      {/* ---------------- focus areas marquee ---------------- */}
-      <div className="sa-marquee" aria-label="Our focus areas">
-        <div className="sa-track">
-          {rowA.map((label, i) => (
-            <span className="sa-mq" key={`a-${i}`}>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z" fill="currentColor" /></svg>
-              {label}
-            </span>
-          ))}
-        </div>
-        <div className="sa-track sa-track--rev">
-          {rowBLoop.map((label, i) => (
-            <span className="sa-mq sa-mq--alt" key={`b-${i}`}>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="currentColor" /></svg>
-              {label}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* ---------------- Scene 02 : approach ---------------- */}
-      <div className="sa-story">
-        <div className="sa-media sa-reveal sa-reveal--left">
-          <NetworkArt />
-          <Shot className="sa-frame--teal" src="/images/about2.png" alt="SIFI Foundation community-led programmes" tag="Community-led" />
-        </div>
-        <div className="sa-story-copy sa-reveal sa-reveal--up" style={{ "--sa-delay": ".15s" }}>
-          <Kicker no="02">Our approach</Kicker>
-          <h2>Working with communities to create lasting opportunity</h2>
-          <p>{paragraphs[1]}</p>
-          <p>{paragraphs[2]}</p>
-        </div>
-      </div>
-
-      {/* ---------------- Scene 03 : belief ---------------- */}
-      <div className="sa-story sa-story--reverse">
-        <div className="sa-story-copy sa-reveal sa-reveal--up">
-          <Kicker no="03">Our belief</Kicker>
-          <h2>Practical action, measurable solutions</h2>
-          <blockquote className="sa-quote">
-            <svg className="sa-quote-mark" viewBox="0 0 48 40" aria-hidden="true"><path d="M0 40V22C0 9 7 2 20 0v8C13 10 10 14 10 20h10v20Zm26 0V22C26 9 33 2 46 0v8c-7 2-10 6-10 12h10v20Z" fill="currentColor" /></svg>
-            {paragraphs[3]}
-          </blockquote>
-        </div>
-        <div className="sa-media sa-reveal sa-reveal--right" style={{ "--sa-delay": ".15s" }}>
-          <NetworkArt className="sa-net--left" />
-          <Shot className="sa-frame--clay" src="/images/about3.png" alt="SIFI Foundation's vision for stronger communities" tag="Vision" />
-        </div>
-      </div>
-
-      {/* ---------------- Scene 04 : values ---------------- */}
-      <div className="sa-values-head sa-reveal sa-reveal--up">
-        <Kicker no="04">What guides us</Kicker>
-        <h2>People, progress and possibilities</h2>
-      </div>
-      <div className="sa-values">
-        {page.cards.map(([title, text], index) => (
-          <div className="sa-reveal sa-reveal--zoom" key={title} style={{ "--sa-delay": `${index * 110}ms` }}>
-            <article className={`sa-value sa-value--${index % 4}`} onMouseMove={spot}>
-              <span className="sa-value-no" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-              <span className="sa-value-icon">{VALUE_ICONS[index % VALUE_ICONS.length]}</span>
-              <h3>{title}</h3>
-              <p>{text}</p>
-            </article>
-          </div>
+      <nav className="sa-rail" aria-label="Page sections">
+        {RAIL.map(([id, label], i) => (
+          <button key={id} type="button" className={i === 0 ? "is-active" : ""} onClick={() => go(id)} aria-label={label}>
+            <span>{label}</span><i />
+          </button>
         ))}
+      </nav>
+
+      {/* ---------------- Overview : hero ---------------- */}
+      <div id="sa-ch0" data-ch="0" className="sa-sec sa-hero">
+        <Kicker>About SIFI Foundation</Kicker>
+        <h1 className="sa-hero-title" aria-label={page.title}>
+          {page.title.split(" ").map((word, i) => (
+            <span className="sa-word" key={`${word}-${i}`} aria-hidden="true">
+              <span style={{ animationDelay: `${0.5 + i * 0.07}s` }}>{word}</span>
+            </span>
+          ))}
+        </h1>
+
+        <div className="sa-hero-row">
+          <p className="sa-lead">{paragraphs[0]}</p>
+          <div className="sa-actions">
+            <a className="sa-btn sa-btn--solid" href="/donate"><span>Support our work</span></a>
+            <a className="sa-btn sa-btn--ghost" href="/reach"><span>Get in touch</span></a>
+          </div>
+        </div>
+
+        <div className="sa-wide">
+          <div className="sa-photo sa-photo--wide">
+            <img className="sa-par" data-speed=".08" src="/images/about1.png" alt="SIFI Foundation working alongside communities" />
+            <span className="sa-streak" aria-hidden="true" />
+          </div>
+        </div>
+
+        <div className="sa-meta">
+          <span>Section 8 not-for-profit</span>
+          <i aria-hidden="true" />
+          <span>Ranchi, Jharkhand</span>
+          <b className="sa-scrollcue" aria-hidden="true"><em>Scroll</em><u /></b>
+        </div>
       </div>
 
-      {/* ---------------- Scene 05 : closing ---------------- */}
-      <div className="sa-cta sa-reveal sa-reveal--zoom">
-        <div className="sa-cta-card">
-          <OrbitRings className="sa-orbits--cta" />
-          <Kicker no="05">Join us</Kicker>
-          <h2>Build lasting opportunity with us</h2>
-          <p>Support our work, volunteer your time or explore a partnership with SIFI Foundation.</p>
-          <div className="sa-actions sa-actions--center">
-            <a className="sa-btn sa-btn--gold" href="/donate">Donate</a>
-            <a className="sa-btn sa-btn--ghost" href="/volunteer">Volunteer</a>
-            <a className="sa-btn sa-btn--ghost" href="/reach">Start a partnership</a>
+      {/* ---------------- I : who we are (scroll se jalte words) ---------------- */}
+      <div id="sa-ch1" data-ch="1" className="sa-sec sa-who">
+        <div className="sa-reveal">
+          <Kicker no={ROMAN[0]}>Who we are</Kicker>
+        </div>
+        <p className="sa-statement" aria-label={paragraphs[1]}>
+          {statementWords.map((w, i) => (
+            <span key={`${w}-${i}`}>
+              <span className="sa-w" aria-hidden="true">{w}</span>{" "}
+            </span>
+          ))}
+        </p>
+      </div>
+
+      {/* ---------------- II : our work ---------------- */}
+      <div id="sa-ch2" data-ch="2" className="sa-sec sa-work">
+        <div className="sa-work-grid">
+          <div className="sa-photo sa-photo--tall sa-reveal sa-reveal--clip">
+            <img className="sa-par" data-speed=".07" src="/images/about2.png" alt="SIFI Foundation community-led programmes" />
+          </div>
+          <div className="sa-work-copy sa-reveal" style={{ "--d": ".2s" }}>
+            <Kicker no={ROMAN[1]}>Our work</Kicker>
+            <h2>Working with communities to create lasting opportunity</h2>
+            <p>{paragraphs[2]}</p>
+          </div>
+        </div>
+
+        <div className="sa-index-wrap">
+          <h3 className="sa-index-title sa-reveal">Focus areas</h3>
+          <ul className="sa-index">
+            {FOCUS_AREAS.map((area, i) => (
+              <li key={area} className="sa-reveal" style={{ "--d": `${(i % 2) * 80 + Math.floor(i / 2) * 70}ms` }}>
+                <span>{area}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* ---------------- III : belief (full-bleed cinematic band) ---------------- */}
+      <div id="sa-ch3" data-ch="3" className="sa-band">
+        <div className="sa-band-media">
+          <img className="sa-par" data-speed=".1" src="/images/about3.png" alt="SIFI Foundation's vision for stronger communities" />
+        </div>
+        <div className="sa-sec sa-band-inner">
+          <div className="sa-band-copy sa-reveal">
+            <Kicker no={ROMAN[2]}>Our belief</Kicker>
+            <h2>Practical action, measurable solutions</h2>
+            <blockquote className="sa-quote">{paragraphs[3]}</blockquote>
+          </div>
+        </div>
+      </div>
+
+      {/* ---------------- IV : what guides us (bento) ---------------- */}
+      <div id="sa-ch4" data-ch="4" className="sa-sec sa-guide">
+        <div className="sa-reveal">
+          <Kicker no={ROMAN[3]}>What guides us</Kicker>
+          <h2 className="sa-guide-title">People, progress and possibilities</h2>
+        </div>
+        <div className="sa-bento">
+          {page.cards.map(([title, text], index) => (
+            <div className={`sa-cell sa-cell--${index} sa-reveal`} key={title} style={{ "--d": `${index * 120}ms` }}>
+              <article className={`sa-value sa-value--${index % 4}`} onMouseMove={spot}>
+                <span className="sa-value-icon">{VALUE_ICONS[index % VALUE_ICONS.length]}</span>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </article>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ---------------- V : join us ---------------- */}
+      <div id="sa-ch5" data-ch="5" className="sa-sec sa-cta">
+        <div className="sa-cta-grid sa-reveal">
+          <div>
+            <Kicker no={ROMAN[4]}>Join us</Kicker>
+            <h2>Build lasting opportunity with us</h2>
+          </div>
+          <div className="sa-cta-side">
+            <p>Support our work, volunteer your time or explore a partnership with SIFI Foundation.</p>
+            <div className="sa-actions">
+              <a className="sa-btn sa-btn--solid" href="/donate"><span>Donate</span></a>
+              <a className="sa-btn sa-btn--ghost" href="/volunteer"><span>Volunteer</span></a>
+              <a className="sa-btn sa-btn--ghost" href="/reach"><span>Start a partnership</span></a>
+            </div>
           </div>
         </div>
       </div>
 
       <style>{`
         .sifi-about{
-          --sa-night:#050D0A;
-          --sa-deep:#0B1F1A;
-          --sa-cream:#FBF7EF;
-          --sa-gold:#F2A93B;
-          --sa-teal:#33C2AE;
-          --sa-clay:#E8734C;
-          --sa-dusk:#7C5CFA;
-          --sa-line:rgba(251,247,239,.14);
-          --sa-muted:rgba(251,247,239,.78);
+          --sa-night:#07110E;
+          --sa-cream:#F3EBDB;
+          --sa-brass:#D9A54B;
+          --sa-sage:#86B8A7;
+          --sa-clay:#C9704F;
+          --sa-mist:rgba(243,235,219,.74);
+          --sa-line:rgba(243,235,219,.14);
+          --sa-ease:cubic-bezier(.2,.75,.2,1);
           --sy:0; --progress:0; --mx:0; --my:0;
           position:relative;
           isolation:isolate;
@@ -693,252 +702,221 @@ function AboutPage({ page }) {
           background:var(--sa-night);
           color:var(--sa-cream);
           font-family:"Work Sans", sans-serif;
-          padding-bottom:110px;
+          padding-bottom:120px;
         }
         .sifi-about *{ box-sizing:border-box; }
-        .sifi-about h1,.sifi-about h2,.sifi-about h3{ font-family:"Fraunces", serif; font-weight:600; letter-spacing:-0.01em; margin:0; color:var(--sa-cream); }
+        .sifi-about h1,.sifi-about h2,.sifi-about h3{ font-family:"Fraunces", serif; font-weight:500; letter-spacing:-0.015em; margin:0; color:var(--sa-cream); }
         .sifi-about p{ margin:0; }
-        .sifi-about ::selection{ background:var(--sa-gold); color:#1A120A; }
+        .sifi-about ::selection{ background:var(--sa-brass); color:#1A120A; }
+        .sa-sec{ position:relative; z-index:2; max-width:1240px; margin:0 auto; padding:0 40px; }
 
-        /* ===== fixed backdrop ===== */
+        /* ===== backdrop ===== */
         .sa-backdrop{ position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none;
-          background:linear-gradient(180deg,#050D0A 0%,#0A1E19 45%,#150F12 100%); }
-        .sa-aurora{ position:absolute; border-radius:50%; filter:blur(90px); opacity:.5; }
-        .sa-aurora--a{ width:56vw; height:56vw; left:-16vw; top:-14vw; background:radial-gradient(circle,var(--sa-teal),transparent 65%); animation:saDriftA 26s ease-in-out infinite alternate; translate:0 calc(var(--sy) * -.06px); }
-        .sa-aurora--b{ width:46vw; height:46vw; right:-12vw; top:6vh; background:radial-gradient(circle,var(--sa-gold),transparent 65%); opacity:.38; animation:saDriftB 30s ease-in-out infinite alternate; translate:0 calc(var(--sy) * -.1px); }
-        .sa-aurora--c{ width:50vw; height:50vw; left:-10vw; bottom:-22vw; background:radial-gradient(circle,var(--sa-clay),transparent 65%); opacity:.34; animation:saDriftC 34s ease-in-out infinite alternate; translate:0 calc(var(--sy) * -.04px); }
-        .sa-aurora--d{ width:42vw; height:42vw; right:6vw; bottom:-16vw; background:radial-gradient(circle,var(--sa-dusk),transparent 65%); opacity:.4; animation:saDriftD 28s ease-in-out infinite alternate; translate:0 calc(var(--sy) * -.08px); }
-        .sa-dusk{ position:absolute; inset:0; background:linear-gradient(180deg,transparent 10%,rgba(232,115,76,.20) 65%,rgba(124,92,250,.24)); opacity:calc(var(--progress) * 1.25); }
-        .sa-spot{ position:absolute; inset:0; background:radial-gradient(440px circle at var(--cx,50%) var(--cy,30%),rgba(242,169,59,.11),transparent 62%); }
+          background:linear-gradient(180deg,#07110E 0%,#0B1A16 40%,#101614 72%,#15100E 100%); }
+        .sa-blob{ position:absolute; border-radius:50%; filter:blur(120px); }
+        .sa-blob--a{ width:52vw; height:52vw; left:-18vw; top:-18vw; background:radial-gradient(circle,var(--sa-sage),transparent 65%); opacity:.2; animation:saBlob 42s ease-in-out infinite alternate; }
+        .sa-blob--b{ width:44vw; height:44vw; right:-14vw; top:8vh; background:radial-gradient(circle,var(--sa-brass),transparent 65%); opacity:.16; animation:saBlob 50s ease-in-out infinite alternate-reverse; }
+        .sa-blob--c{ width:46vw; height:46vw; left:10vw; bottom:-24vw; background:radial-gradient(circle,var(--sa-clay),transparent 65%); opacity:.15; animation:saBlob 46s ease-in-out infinite alternate; }
+        .sa-dusk{ position:absolute; inset:0; background:linear-gradient(180deg,transparent 20%,rgba(201,112,79,.14) 70%,rgba(124,92,250,.10)); opacity:calc(var(--progress) * 1.2); }
+        .sa-spot{ position:absolute; inset:0; background:radial-gradient(460px circle at var(--cx,50%) var(--cy,30%),rgba(217,165,75,.07),transparent 62%); }
 
-        /* ===== SVG particles ===== */
-        .sa-particles{ position:absolute; inset:0; }
-        .sa-p{ position:absolute; bottom:-40px; display:block; opacity:0; animation:saFloat linear infinite; will-change:transform,opacity; }
-        .sa-p svg{ width:100%; height:100%; display:block; overflow:visible; animation:saSway ease-in-out infinite alternate; }
-        .sa-t0{ color:var(--sa-gold); }
-        .sa-t1{ color:var(--sa-teal); }
-        .sa-t2{ color:var(--sa-clay); }
-        .sa-t3{ color:var(--sa-cream); }
-        .sa-t4{ color:#A594FF; }
+        .sa-contours{ position:absolute; inset:0; width:100%; height:100%; translate:0 calc(var(--sy) * -.04px); }
+        .sa-contour-g{ transform-origin:800px 500px; animation:saBreath 80s ease-in-out infinite alternate; }
+        .sa-c{ fill:none; stroke:rgba(243,235,219,.09); stroke-width:1.1; stroke-dasharray:1; stroke-dashoffset:1; animation:saDrawLine 3.8s cubic-bezier(.4,0,.2,1) forwards; }
+        .sa-c--accent{ stroke:rgba(217,165,75,.24); }
+        .sa-ping{ fill:none; stroke:var(--sa-brass); stroke-width:1; transform-box:fill-box; transform-origin:center; animation:saPing 5s ease-out infinite 3s; opacity:0; }
+
+        .sa-shaft{ position:absolute; top:-25%; height:160%; width:16vw; filter:blur(34px); mix-blend-mode:screen; transform:rotate(19deg); background:linear-gradient(180deg,rgba(217,165,75,.15),transparent 72%); animation:saShaft 20s ease-in-out infinite alternate; }
+        .sa-shaft--1{ left:52%; } .sa-shaft--2{ left:66%; width:9vw; animation-delay:-7s; opacity:.8; } .sa-shaft--3{ left:82%; width:12vw; animation-delay:-13s; opacity:.6; }
+
+        .sa-particles{ position:absolute; inset:0; translate:calc(var(--mx) * -18px) calc(var(--my) * -12px); transition:translate .4s ease-out; }
+        .sa-p{ position:absolute; bottom:-60px; display:block; opacity:0; animation:saRise linear infinite; will-change:transform,opacity; }
+        .sa-p svg{ width:100%; height:100%; display:block; overflow:visible; animation:saTwinkle ease-in-out infinite alternate; }
+        .sa-p--bokeh svg{ filter:blur(1.5px); }
+        .sa-t0{ color:var(--sa-brass); } .sa-t1{ color:var(--sa-cream); } .sa-t2{ color:var(--sa-sage); }
 
         /* ===== film overlays ===== */
-        .sa-vignette{ position:fixed; inset:0; z-index:14; pointer-events:none; background:radial-gradient(120% 100% at 50% 45%,transparent 55%,rgba(0,0,0,.55)); }
-        .sa-grain{ position:fixed; inset:-50%; width:200%; height:200%; z-index:15; pointer-events:none; opacity:.08; mix-blend-mode:overlay;
+        .sa-vignette{ position:fixed; inset:0; z-index:14; pointer-events:none; background:radial-gradient(130% 105% at 50% 45%,transparent 60%,rgba(0,0,0,.5)); }
+        .sa-grain{ position:fixed; inset:-50%; width:200%; height:200%; z-index:15; pointer-events:none; opacity:.06; mix-blend-mode:overlay;
           background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.6'/></svg>");
-          animation:saGrain .9s steps(6) infinite; }
-        .sa-progress{ position:fixed; left:0; bottom:0; width:100%; height:3px; z-index:20; pointer-events:none; transform-origin:left; transform:scaleX(var(--progress));
-          background:linear-gradient(90deg,var(--sa-teal),var(--sa-gold),var(--sa-clay),var(--sa-dusk)); }
+          animation:saGrain 1s steps(6) infinite; }
+        .sa-open{ position:fixed; inset:0; z-index:30; background:#000; pointer-events:none; animation:saFadeOpen 1.6s ease .1s forwards; }
 
-        /* ===== shared bits ===== */
-        .sa-kicker{ display:flex; align-items:center; gap:10px; font-size:.9rem; color:var(--sa-gold); margin-bottom:20px; font-weight:500; }
-        .sa-kicker em{ font-style:normal; color:var(--sa-cream); opacity:.6; }
-        .sa-kicker em::after{ content:"/"; margin-left:10px; opacity:.5; }
-        .sa-kicker-dot{ width:8px; height:8px; border-radius:50%; background:var(--sa-gold); flex:none; box-shadow:0 0 0 0 rgba(242,169,59,.6); animation:saPulse 2.4s ease-out infinite; }
+        /* ===== chapter rail ===== */
+        .sa-rail{ position:fixed; right:22px; top:50%; translate:0 -50%; z-index:12; display:flex; flex-direction:column; gap:20px; padding:6px 0; }
+        .sa-rail::before,.sa-rail::after{ content:""; position:absolute; right:5px; top:0; bottom:0; width:1px; }
+        .sa-rail::before{ background:var(--sa-line); }
+        .sa-rail::after{ background:var(--sa-brass); transform-origin:top; transform:scaleY(var(--progress)); }
+        .sa-rail button{ position:relative; display:flex; align-items:center; justify-content:flex-end; gap:14px; padding:0; border:0; background:none; cursor:pointer; color:var(--sa-cream); }
+        .sa-rail button span{ font-size:.78rem; opacity:0; transform:translateX(6px); transition:opacity .35s ease, transform .35s ease; white-space:nowrap; }
+        .sa-rail button i{ position:relative; z-index:1; width:11px; height:11px; border-radius:50%; background:var(--sa-night); border:1px solid rgba(243,235,219,.4); transition:background .4s ease, border-color .4s ease, transform .4s ease; }
+        .sa-rail button:hover span,.sa-rail button:focus-visible span,.sa-rail button.is-active span{ opacity:.9; transform:none; }
+        .sa-rail button.is-active i{ background:var(--sa-brass); border-color:var(--sa-brass); transform:scale(1.15); }
+        .sa-rail button:focus-visible{ outline:2px solid var(--sa-brass); outline-offset:4px; }
 
-        .sa-btn{ position:relative; display:inline-flex; align-items:center; justify-content:center; padding:15px 30px; border-radius:999px; font-weight:600; font-size:.95rem; text-decoration:none; overflow:hidden; transition:transform .3s ease, box-shadow .3s ease, background .3s ease; }
-        .sa-btn:hover{ transform:translateY(-3px); }
+        /* ===== shared ===== */
+        .sa-kicker{ display:flex; align-items:center; gap:14px; margin-bottom:26px; font-size:.9rem; letter-spacing:.03em; color:var(--sa-brass); font-weight:500; }
+        .sa-k-line{ display:block; width:38px; height:1px; background:var(--sa-brass); flex:none; }
+        .sa-kicker em{ font-family:"Fraunces",serif; font-style:italic; font-size:1.05rem; color:var(--sa-cream); opacity:.85; }
+
+        .sa-btn{ position:relative; display:inline-flex; align-items:center; justify-content:center; padding:15px 30px; border-radius:2px; font-weight:600; font-size:.93rem; letter-spacing:.01em; text-decoration:none; overflow:hidden; isolation:isolate; transition:color .45s var(--sa-ease), border-color .45s ease; }
+        .sa-btn::before{ content:""; position:absolute; inset:0; z-index:-1; transform:translateX(-101%); transition:transform .55s var(--sa-ease); }
+        .sa-btn:hover::before{ transform:none; }
         .sa-btn:focus-visible{ outline:2px solid var(--sa-cream); outline-offset:4px; }
-        .sa-btn--gold{ color:#1A120A; background:linear-gradient(120deg,#F9CF7A,#F2A93B 45%,#E8734C); box-shadow:0 14px 40px -14px rgba(242,169,59,.75); }
-        .sa-btn--gold::after{ content:""; position:absolute; inset:0; background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%); transform:translateX(-120%); animation:saSweep 4.5s ease-in-out infinite; }
-        .sa-btn--ghost{ color:var(--sa-cream); border:1px solid var(--sa-line); background:rgba(255,255,255,.05); backdrop-filter:blur(8px); }
-        .sa-btn--ghost:hover{ background:rgba(255,255,255,.12); border-color:rgba(251,247,239,.4); }
-        .sa-actions{ display:flex; flex-wrap:wrap; gap:14px; margin-top:34px; }
-        .sa-actions--center{ justify-content:center; }
+        .sa-btn--solid{ background:var(--sa-brass); color:#1A120A; }
+        .sa-btn--solid::before{ background:var(--sa-cream); }
+        .sa-btn--ghost{ color:var(--sa-cream); border:1px solid rgba(243,235,219,.3); }
+        .sa-btn--ghost::before{ background:rgba(243,235,219,.12); }
+        .sa-btn--ghost:hover{ border-color:var(--sa-cream); }
+        .sa-actions{ display:flex; flex-wrap:wrap; gap:12px; }
 
-        /* ===== reveal (scroll) ===== */
-        .sa-reveal{ opacity:0; filter:blur(8px); transform:translateY(34px); transition:opacity 1s ease var(--sa-delay,0s), filter 1s ease var(--sa-delay,0s), transform 1s cubic-bezier(.19,1,.22,1) var(--sa-delay,0s); }
-        .sa-reveal--left{ transform:translateX(-56px); }
-        .sa-reveal--right{ transform:translateX(56px); }
-        .sa-reveal--zoom{ transform:scale(.93) translateY(20px); }
-        .sa-reveal.is-in{ opacity:1; filter:none; transform:none; }
+        .sa-reveal{ opacity:0; transform:translateY(26px); transition:opacity 1.2s var(--sa-ease) var(--d,0s), transform 1.4s var(--sa-ease) var(--d,0s); }
+        .sa-reveal.is-in{ opacity:1; transform:none; }
+        .sa-reveal--clip{ opacity:1; transform:none; clip-path:inset(100% 0 0 0); transition:clip-path 1.6s cubic-bezier(.77,0,.18,1) var(--d,0s); }
+        .sa-reveal--clip.is-in{ clip-path:inset(0 0 0 0); }
+
+        .sa-photo{ position:relative; overflow:hidden; background:#000; }
+        .sa-photo img,.sa-band-media img{ position:absolute; left:0; top:-12%; width:100%; height:124%; object-fit:cover; display:block; filter:saturate(1.05) contrast(1.05); animation:saKen 30s ease-in-out infinite alternate; }
+        .sa-photo::before{ content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+          background:radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(0,0,0,.45)), linear-gradient(160deg,rgba(134,184,167,.16),transparent 50%,rgba(201,112,79,.18)); }
 
         /* ===== hero ===== */
-        .sa-hero{ position:relative; min-height:min(96vh,920px); display:flex; align-items:center; padding:110px 0 230px; overflow:hidden; }
-        .sa-hero-inner{ position:relative; z-index:3; width:100%; max-width:1180px; margin:0 auto; padding:0 32px; display:grid; grid-template-columns:1.05fr .95fr; gap:64px; align-items:center; }
-        .sa-hero-copy > .sa-kicker,
-        .sa-hero-copy > .sa-lead,
-        .sa-hero-copy > .sa-actions{ opacity:0; animation:saRise .9s cubic-bezier(.19,1,.22,1) forwards; }
-        .sa-hero-copy > .sa-kicker{ animation-delay:.25s; }
-        .sa-hero-copy > .sa-lead{ animation-delay:1.3s; }
-        .sa-hero-copy > .sa-actions{ animation-delay:1.55s; }
+        .sa-hero{ padding-top:128px; padding-bottom:40px; }
+        .sa-hero > .sa-kicker{ opacity:0; animation:saFade 1.2s ease 1s forwards; }
+        .sa-hero-title{ max-width:15em; font-size:clamp(2.5rem,6vw,5.1rem); line-height:1.05; font-weight:500; }
+        .sa-word{ display:inline-block; overflow:hidden; vertical-align:top; padding:0 .04em .12em; margin-right:.22em; }
+        .sa-word > span{ display:inline-block; transform:translateY(112%); animation:saWordUp 1.3s cubic-bezier(.16,.84,.24,1) forwards; }
+        .sa-hero-row{ display:grid; grid-template-columns:1.15fr .85fr; gap:64px; align-items:end; margin-top:44px; opacity:0; animation:saFade 1.4s ease 1.7s forwards; }
+        .sa-lead{ max-width:52ch; font-size:1.08rem; line-height:1.85; color:var(--sa-mist); }
+        .sa-hero-row .sa-actions{ justify-content:flex-end; }
 
-        .sa-hero-title{ font-size:clamp(2.2rem,4.4vw,3.6rem); line-height:1.1; }
-        .sa-word{ display:inline-block; overflow:hidden; vertical-align:top; padding:0 .04em .14em; margin-right:.2em; }
-        .sa-word > span{ display:inline-block; transform:translateY(110%); filter:blur(10px);
-          background:linear-gradient(100deg,#FBF7EF 0%,#F9D48A 35%,#F2A93B 50%,#F9D48A 65%,#FBF7EF 100%); background-size:220% 100%;
-          -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
-          animation:saWordUp 1s cubic-bezier(.16,.84,.24,1) forwards, saShine 9s linear infinite; }
-        .sa-lead{ margin-top:24px; max-width:54ch; font-size:1.06rem; line-height:1.8; color:var(--sa-muted); }
+        .sa-wide{ margin-top:72px; clip-path:inset(0 50% 0 50%); animation:saAperture 1.9s cubic-bezier(.77,0,.18,1) 1.5s forwards; }
+        .sa-photo--wide{ aspect-ratio:21/9; border:1px solid var(--sa-line); box-shadow:0 50px 90px -40px rgba(0,0,0,.85); }
+        .sa-streak{ position:absolute; left:0; right:0; top:50%; height:2px; z-index:2; pointer-events:none; transform:scaleX(0);
+          background:linear-gradient(90deg,transparent,rgba(255,236,196,.95),transparent); box-shadow:0 0 22px 4px rgba(217,165,75,.5); animation:saStreak 2.6s cubic-bezier(.5,0,.2,1) 2.7s forwards; }
+        .sa-meta{ display:flex; align-items:center; gap:18px; margin-top:22px; font-size:.86rem; color:rgba(243,235,219,.68); opacity:0; animation:saFade 1.2s ease 3s forwards; }
+        .sa-meta > i{ width:1px; height:14px; background:var(--sa-line); }
+        .sa-scrollcue{ margin-left:auto; display:flex; align-items:center; gap:12px; font-weight:400; }
+        .sa-scrollcue em{ font-style:normal; }
+        .sa-scrollcue u{ position:relative; width:46px; height:1px; background:var(--sa-line); overflow:hidden; text-decoration:none; }
+        .sa-scrollcue u::after{ content:""; position:absolute; inset:0; background:var(--sa-brass); transform:translateX(-100%); animation:saScrollLine 3s ease-in-out infinite; }
 
-        .sa-hero-visual{ position:relative; max-width:450px; width:100%; justify-self:center; perspective:1100px; opacity:0; animation:saZoomIn 1.4s cubic-bezier(.19,1,.22,1) 1s forwards; }
-        .sa-tilt{ position:relative; transform-style:preserve-3d; transform:rotateY(calc(var(--mx) * 8deg)) rotateX(calc(var(--my) * -8deg)); transition:transform .25s ease-out; }
-        .sa-chip{ position:absolute; z-index:4; padding:10px 16px; border-radius:999px; font-size:.82rem; font-weight:500; background:rgba(8,20,16,.62); border:1px solid var(--sa-line); backdrop-filter:blur(12px); color:var(--sa-cream); animation:saBob 6s ease-in-out infinite; }
-        .sa-chip--a{ top:24px; left:-40px; }
-        .sa-chip--b{ bottom:34px; right:-26px; animation-delay:-3s; }
+        /* ===== I : who we are ===== */
+        .sa-who{ padding-top:180px; padding-bottom:170px; }
+        .sa-statement{ max-width:24em; font-family:"Fraunces",serif; font-weight:400; font-size:clamp(1.7rem,3.3vw,2.85rem); line-height:1.32; letter-spacing:-.012em; }
+        .sa-w{ color:rgba(243,235,219,.17); transition:color .7s ease; }
+        .sa-w.on{ color:var(--sa-cream); }
 
-        .sa-horizon{ position:absolute; left:0; right:0; bottom:0; width:100%; height:min(48vh,440px); z-index:1; pointer-events:none; }
-        .sa-sun-glow{ transform-box:fill-box; transform-origin:center; animation:saSunPulse 7s ease-in-out infinite; }
-        .sa-rays{ transform-origin:720px 215px; animation:saSpin 90s linear infinite; }
-        .sa-hill--a{ transform:translateY(calc(var(--sy) * .05px)); }
-        .sa-hill--b{ transform:translateY(calc(var(--sy) * .03px)); }
-        .sa-hill--c{ transform:translateY(calc(var(--sy) * .015px)); }
-        .sa-bird{ animation:saFly linear infinite; }
-        .sa-wing{ transform-box:fill-box; transform-origin:center; animation:saFlap .9s ease-in-out infinite alternate; }
+        /* ===== II : our work ===== */
+        .sa-work{ padding-bottom:170px; }
+        .sa-work-grid{ display:grid; grid-template-columns:5fr 6fr; gap:clamp(48px,8vw,120px); align-items:center; }
+        .sa-photo--tall{ aspect-ratio:4/5; border:1px solid var(--sa-line); box-shadow:0 50px 90px -40px rgba(0,0,0,.85); }
+        .sa-work-copy h2{ font-size:clamp(1.9rem,3.3vw,2.8rem); line-height:1.15; margin-bottom:26px; }
+        .sa-work-copy > p{ max-width:52ch; line-height:1.9; color:var(--sa-mist); }
+        .sa-index-wrap{ margin-top:120px; }
+        .sa-index-title{ font-size:1.15rem; margin-bottom:22px; color:var(--sa-brass); font-weight:500; }
+        .sa-index{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; column-gap:64px; }
+        .sa-index li{ position:relative; border-top:1px solid var(--sa-line); }
+        .sa-index li::after{ content:""; position:absolute; left:0; top:-1px; height:1px; width:100%; background:var(--sa-brass); transform:scaleX(0); transform-origin:left; transition:transform .7s var(--sa-ease); }
+        .sa-index li:hover::after{ transform:scaleX(1); }
+        .sa-index li span{ display:block; padding:22px 0; font-family:"Fraunces",serif; font-size:1.2rem; color:var(--sa-mist); transition:color .4s ease, transform .6s var(--sa-ease); }
+        .sa-index li:hover span{ color:var(--sa-cream); transform:translateX(10px); }
 
-        .sa-bar{ position:absolute; left:0; right:0; height:9vh; background:#000; z-index:9; pointer-events:none; animation:saBar 1.5s cubic-bezier(.7,0,.2,1) 1.1s forwards; }
-        .sa-bar--t{ top:0; } .sa-bar--b{ bottom:0; }
-        .sa-leak{ position:absolute; top:-20%; left:-30%; width:60%; height:140%; z-index:2; pointer-events:none; mix-blend-mode:screen; filter:blur(50px);
-          background:linear-gradient(100deg,transparent,rgba(242,169,59,.28),rgba(232,115,76,.22),transparent); animation:saLeak 16s ease-in-out infinite; }
-        .sa-scroll{ position:absolute; bottom:28px; left:50%; width:22px; height:38px; margin-left:-11px; z-index:4; border:1.5px solid rgba(251,247,239,.5); border-radius:12px; }
-        .sa-scroll i{ position:absolute; left:50%; top:7px; width:3px; height:8px; margin-left:-1.5px; border-radius:2px; background:var(--sa-gold); animation:saScrollCue 1.8s ease-in-out infinite; }
+        /* ===== III : belief band ===== */
+        .sa-band{ position:relative; z-index:2; min-height:min(88vh,780px); display:flex; align-items:center; margin-bottom:170px; }
+        .sa-band-media{ position:absolute; inset:0; overflow:hidden; -webkit-mask-image:linear-gradient(180deg,transparent,#000 18%,#000 82%,transparent); mask-image:linear-gradient(180deg,transparent,#000 18%,#000 82%,transparent); }
+        .sa-band-media::after{ content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(7,17,14,.94) 5%,rgba(7,17,14,.72) 45%,rgba(7,17,14,.2) 100%), linear-gradient(160deg,rgba(134,184,167,.14),transparent 50%,rgba(201,112,79,.2)); }
+        .sa-band-inner{ width:100%; padding-top:110px; padding-bottom:110px; }
+        .sa-band-copy{ max-width:640px; }
+        .sa-band-copy h2{ font-size:clamp(1.9rem,3.6vw,3rem); line-height:1.12; margin-bottom:32px; }
+        .sa-quote{ margin:0; padding-left:26px; border-left:1px solid var(--sa-brass); font-family:"Fraunces",serif; font-weight:400; font-size:clamp(1.15rem,1.7vw,1.4rem); line-height:1.7; color:var(--sa-cream); }
 
-        /* ===== cinematic frame ===== */
-        .sa-frame{ position:relative; padding:12px; border-radius:6px; background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.03)); border:1px solid var(--sa-line);
-          box-shadow:0 44px 80px -34px rgba(0,0,0,.8), 0 0 70px -14px rgba(242,169,59,.28); }
-        .sa-frame--teal{ box-shadow:0 44px 80px -34px rgba(0,0,0,.8), 0 0 70px -14px rgba(51,194,174,.35); }
-        .sa-frame--clay{ box-shadow:0 44px 80px -34px rgba(0,0,0,.8), 0 0 70px -14px rgba(232,115,76,.38); }
-        .sa-shot{ position:relative; overflow:hidden; border-radius:3px; background:#000; }
-        .sa-shot img{ display:block; width:100%; height:100%; aspect-ratio:5/4; object-fit:cover; filter:saturate(1.1) contrast(1.06); animation:saKen 22s ease-in-out infinite alternate; }
-        .sa-frame--hero .sa-shot img{ aspect-ratio:4/4.7; }
-        .sa-shot::before{ content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
-          background:radial-gradient(120% 90% at 50% 40%,transparent 50%,rgba(0,0,0,.5)), linear-gradient(160deg,rgba(51,194,174,.18),transparent 45%,rgba(232,115,76,.22)); }
-        .sa-shot::after{ content:""; position:absolute; inset:0; z-index:2; pointer-events:none; background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.22) 50%,transparent 60%); transform:translateX(-130%); animation:saSweep 7s ease-in-out infinite; }
-        .sa-rec{ position:absolute; z-index:3; left:14px; top:14px; display:inline-flex; align-items:center; gap:8px; padding:5px 10px; border-radius:999px; font-size:.74rem; font-weight:500; color:var(--sa-cream); background:rgba(0,0,0,.45); backdrop-filter:blur(6px); }
-        .sa-rec i{ width:7px; height:7px; border-radius:50%; background:#FF4B4B; animation:saBlink 1.4s steps(2) infinite; }
-        .sa-corner{ position:absolute; width:18px; height:18px; border:2px solid var(--sa-gold); pointer-events:none; opacity:.9; }
-        .sa-corner--tl{ top:-6px; left:-6px; border-right:0; border-bottom:0; }
-        .sa-corner--tr{ top:-6px; right:-6px; border-left:0; border-bottom:0; }
-        .sa-corner--bl{ bottom:-6px; left:-6px; border-right:0; border-top:0; }
-        .sa-corner--br{ bottom:-6px; right:-6px; border-left:0; border-top:0; }
-
-        /* ===== orbit rings ===== */
-        .sa-orbits{ position:absolute; inset:-9%; width:118%; height:118%; z-index:0; pointer-events:none; overflow:visible; }
-        .sa-ring{ fill:none; stroke:rgba(251,247,239,.22); stroke-width:1; transform-origin:250px 250px; }
-        .sa-ring--1{ stroke-dasharray:4 10; animation:saSpin 70s linear infinite; }
-        .sa-ring--2{ stroke:rgba(242,169,59,.28); animation:saSpinRev 90s linear infinite; }
-        .sa-orbit{ transform-origin:250px 250px; }
-        .sa-orbit--1{ animation:saSpin 22s linear infinite; }
-        .sa-orbit--2{ animation:saSpinRev 30s linear infinite; }
-        .sa-orbits--cta{ inset:auto; left:50%; top:50%; width:min(900px,120%); height:auto; aspect-ratio:1; margin:0; translate:-50% -50%; opacity:.5; }
-
-        /* ===== network art ===== */
-        .sa-media{ position:relative; translate:0 calc(var(--sy) * -.01px); }
-        .sa-media .sa-frame{ position:relative; z-index:1; }
-        .sa-net{ position:absolute; z-index:0; width:78%; right:-22%; top:-20%; overflow:visible; pointer-events:none; }
-        .sa-net--left{ right:auto; left:-22%; }
-        .sa-net-line{ stroke:rgba(251,247,239,.35); stroke-width:1; stroke-dasharray:4 7; animation:saDash 3s linear infinite; }
-        .sa-node{ fill:var(--sa-gold); }
-        .sa-node--1{ fill:var(--sa-teal); }
-        .sa-node--2{ fill:var(--sa-clay); }
-        .sa-node-halo{ fill:rgba(251,247,239,.12); transform-box:fill-box; transform-origin:center; animation:saHalo 3.4s ease-in-out infinite; }
-        .sa-ripple{ fill:none; stroke:var(--sa-gold); stroke-width:1.5; transform-box:fill-box; transform-origin:center; animation:saRipple 3.6s ease-out infinite; }
-        .sa-ripple--2{ animation-delay:-1.8s; }
-
-        /* ===== marquee ===== */
-        .sa-marquee{ position:relative; z-index:2; margin:0 0 120px; padding:18px 0; overflow:hidden; display:grid; gap:14px;
-          border-block:1px solid var(--sa-line); background:rgba(255,255,255,.035); backdrop-filter:blur(8px);
-          -webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent); mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent); }
-        .sa-track{ display:flex; gap:44px; width:max-content; animation:saMarq 55s linear infinite; }
-        .sa-track--rev{ animation-direction:reverse; animation-duration:65s; }
-        .sa-mq{ display:inline-flex; align-items:center; gap:12px; white-space:nowrap; font-family:"Fraunces",serif; font-size:1.35rem; color:var(--sa-cream); }
-        .sa-mq svg{ width:14px; height:14px; color:var(--sa-gold); flex:none; animation:saSpin 8s linear infinite; }
-        .sa-mq--alt{ color:rgba(251,247,239,.62); }
-        .sa-mq--alt svg{ color:var(--sa-teal); animation:none; }
-
-        /* ===== story scenes ===== */
-        .sa-story{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:0 32px 130px; display:grid; grid-template-columns:.9fr 1.1fr; gap:80px; align-items:center; }
-        .sa-story--reverse{ grid-template-columns:1.1fr .9fr; }
-        .sa-story-copy h2{ font-size:clamp(1.75rem,2.9vw,2.4rem); line-height:1.15; margin-bottom:24px; }
-        .sa-story-copy > p{ line-height:1.85; color:var(--sa-muted); max-width:56ch; }
-        .sa-story-copy > p + p{ margin-top:18px; }
-        .sa-quote{ position:relative; margin:0; padding:26px 0 0 26px; border-left:3px solid var(--sa-gold); font-family:"Fraunces",serif; font-style:italic; font-size:clamp(1.15rem,1.7vw,1.4rem); line-height:1.65; color:var(--sa-cream); max-width:50ch; }
-        .sa-quote-mark{ position:absolute; top:-6px; left:22px; width:38px; color:var(--sa-gold); opacity:.35; animation:saBob 7s ease-in-out infinite; }
-
-        /* ===== values ===== */
-        .sa-values-head{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:0 32px 44px; }
-        .sa-values-head h2{ font-size:clamp(1.75rem,2.9vw,2.4rem); max-width:20ch; line-height:1.15; }
-        .sa-values{ position:relative; z-index:2; max-width:1180px; margin:0 auto; padding:0 32px; display:grid; grid-template-columns:1fr 1fr; gap:22px; }
-        .sa-value{ --vc:var(--sa-gold); position:relative; height:100%; overflow:hidden; padding:40px 36px; border-radius:8px; border:1px solid var(--sa-line);
-          background:rgba(255,255,255,.055); backdrop-filter:blur(14px); transition:translate .35s ease, border-color .35s ease, box-shadow .35s ease; }
-        .sa-value--1{ --vc:var(--sa-teal); } .sa-value--2{ --vc:var(--sa-clay); } .sa-value--3{ --vc:#A594FF; }
-        .sa-value::before{ content:""; position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .35s ease;
-          background:radial-gradient(300px circle at var(--px,50%) var(--py,50%),color-mix(in srgb,var(--vc) 28%,transparent),transparent 65%); }
-        .sa-value::after{ content:""; position:absolute; left:0; top:0; width:100%; height:3px; background:linear-gradient(90deg,var(--vc),transparent); }
-        .sa-value:hover{ translate:0 -6px; border-color:var(--vc); box-shadow:0 30px 60px -30px var(--vc); }
+        /* ===== IV : bento ===== */
+        .sa-guide{ padding-bottom:0; }
+        .sa-guide-title{ font-size:clamp(1.9rem,3.3vw,2.8rem); line-height:1.15; max-width:18ch; margin-bottom:52px; }
+        .sa-bento{ display:grid; grid-template-columns:repeat(12,1fr); gap:20px; }
+        .sa-cell--0{ grid-column:1 / span 6; grid-row:1 / span 2; }
+        .sa-cell--1{ grid-column:7 / span 6; }
+        .sa-cell--2{ grid-column:7 / span 3; }
+        .sa-cell--3{ grid-column:10 / span 3; }
+        .sa-value{ --vc:var(--sa-brass); position:relative; height:100%; overflow:hidden; padding:40px 36px; border-radius:3px; border:1px solid var(--sa-line); background:rgba(243,235,219,.035); backdrop-filter:blur(12px); transition:border-color .5s ease, background .5s ease; }
+        .sa-value--1{ --vc:var(--sa-sage); } .sa-value--2{ --vc:var(--sa-clay); } .sa-value--3{ --vc:#B3A6F5; }
+        .sa-value::before{ content:""; position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .5s ease; background:radial-gradient(320px circle at var(--px,50%) var(--py,50%),color-mix(in srgb,var(--vc) 20%,transparent),transparent 65%); }
+        .sa-value::after{ content:""; position:absolute; left:0; top:0; width:100%; height:2px; background:var(--vc); transform:scaleX(0); transform-origin:left; transition:transform .8s var(--sa-ease); }
+        .sa-value:hover{ border-color:color-mix(in srgb,var(--vc) 55%,transparent); background:rgba(243,235,219,.05); }
         .sa-value:hover::before{ opacity:1; }
+        .sa-value:hover::after{ transform:scaleX(1); }
         .sa-value > *{ position:relative; }
-        .sa-value-no{ position:absolute !important; right:24px; top:14px; font-family:"Fraunces",serif; font-size:3.6rem; line-height:1; color:transparent; -webkit-text-stroke:1px rgba(251,247,239,.22); }
-        .sa-value-icon{ display:inline-flex; align-items:center; justify-content:center; width:54px; height:54px; margin-bottom:20px; border-radius:50%; color:var(--vc); background:color-mix(in srgb,var(--vc) 16%,transparent); box-shadow:0 0 0 0 var(--vc); animation:saPulse 3.2s ease-out infinite; }
-        .sa-value-icon svg{ width:28px; height:28px; }
-        .sa-value-icon svg *{ stroke-dasharray:1; stroke-dashoffset:1; animation:saDraw 2.4s ease forwards 1s; }
-        .sa-value h3{ font-size:1.25rem; margin-bottom:12px; }
-        .sa-value p{ line-height:1.75; color:var(--sa-muted); font-size:.97rem; }
+        .sa-value-icon{ display:inline-flex; width:44px; height:44px; margin-bottom:26px; color:var(--vc); }
+        .sa-value-icon svg{ width:100%; height:100%; }
+        .sa-value-icon svg *{ stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset 2s var(--sa-ease) .4s; }
+        .is-in .sa-value-icon svg *{ stroke-dashoffset:0; }
+        .sa-value h3{ font-size:1.3rem; margin-bottom:14px; }
+        .sa-value p{ line-height:1.8; color:var(--sa-mist); font-size:.96rem; }
+        .sa-value--0{ display:flex; flex-direction:column; justify-content:flex-end; min-height:420px; }
+        .sa-value--0 .sa-value-icon{ width:64px; height:64px; margin-bottom:auto; }
+        .sa-value--0 h3{ font-size:clamp(1.8rem,2.8vw,2.4rem); }
+        .sa-value--0 p{ font-family:"Fraunces",serif; font-size:clamp(1.1rem,1.6vw,1.35rem); line-height:1.6; max-width:28em; }
 
-        /* ===== closing ===== */
-        .sa-cta{ position:relative; z-index:2; max-width:1180px; margin:130px auto 0; padding:0 32px; }
-        .sa-cta-card{ position:relative; overflow:hidden; padding:88px 48px; text-align:center; border-radius:12px; border:1px solid var(--sa-line);
-          background:radial-gradient(120% 140% at 0% 0%,rgba(242,169,59,.30),transparent 55%), radial-gradient(120% 140% at 100% 100%,rgba(124,92,250,.32),transparent 55%), rgba(255,255,255,.04); }
-        .sa-cta-card > *:not(.sa-orbits){ position:relative; z-index:1; }
-        .sa-cta-card .sa-kicker{ justify-content:center; }
-        .sa-cta-card h2{ font-size:clamp(1.9rem,3.4vw,2.8rem); line-height:1.15; max-width:22ch; margin:0 auto 18px; }
-        .sa-cta-card > p{ max-width:52ch; margin:0 auto; line-height:1.8; color:var(--sa-muted); }
+        /* ===== V : cta ===== */
+        .sa-cta{ padding-top:170px; }
+        .sa-cta-grid{ display:grid; grid-template-columns:1.2fr .8fr; gap:72px; align-items:end; padding:72px 0 0; border-top:1px solid var(--sa-line); }
+        .sa-cta h2{ font-size:clamp(2.2rem,4.8vw,4rem); line-height:1.08; max-width:12em; }
+        .sa-cta-side p{ max-width:40ch; line-height:1.85; color:var(--sa-mist); margin-bottom:30px; }
 
         /* ===== keyframes ===== */
-        @keyframes saRise{ from{ opacity:0; transform:translateY(22px);} to{ opacity:1; transform:none;} }
-        @keyframes saWordUp{ to{ transform:translateY(0); filter:blur(0);} }
-        @keyframes saShine{ from{ background-position:0% 0;} to{ background-position:-220% 0;} }
-        @keyframes saZoomIn{ from{ opacity:0; transform:scale(.9) translateY(30px);} to{ opacity:1; transform:none;} }
-        @keyframes saFloat{ 0%{ transform:translate3d(0,0,0) rotate(0); opacity:0;} 10%{ opacity:.9;} 85%{ opacity:.7;} 100%{ transform:translate3d(var(--drift),-118vh,0) rotate(var(--rot)); opacity:0;} }
-        @keyframes saSway{ from{ transform:translateX(-12px) scale(.85); opacity:.55;} to{ transform:translateX(12px) scale(1.2); opacity:1;} }
-        @keyframes saDriftA{ from{ transform:translate(0,0) scale(1);} to{ transform:translate(12vw,10vh) scale(1.2);} }
-        @keyframes saDriftB{ from{ transform:translate(0,0) scale(1.1);} to{ transform:translate(-10vw,14vh) scale(.9);} }
-        @keyframes saDriftC{ from{ transform:translate(0,0) scale(1);} to{ transform:translate(14vw,-10vh) scale(1.25);} }
-        @keyframes saDriftD{ from{ transform:translate(0,0) scale(1);} to{ transform:translate(-12vw,-8vh) scale(1.15);} }
-        @keyframes saKen{ from{ transform:scale(1.02) translate(0,0);} to{ transform:scale(1.16) translate(-2%,-2%);} }
-        @keyframes saSweep{ 0%,55%{ transform:translateX(-130%);} 100%{ transform:translateX(130%);} }
-        @keyframes saBar{ to{ height:0;} }
-        @keyframes saLeak{ 0%{ transform:translateX(0) rotate(0); opacity:0;} 30%{ opacity:.9;} 100%{ transform:translateX(230%) rotate(6deg); opacity:0;} }
-        @keyframes saMarq{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
-        @keyframes saSpin{ to{ transform:rotate(360deg);} }
-        @keyframes saSpinRev{ to{ transform:rotate(-360deg);} }
-        @keyframes saBob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-12px);} }
-        @keyframes saPulse{ 0%{ box-shadow:0 0 0 0 color-mix(in srgb,currentColor 55%,transparent);} 70%,100%{ box-shadow:0 0 0 16px transparent;} }
-        @keyframes saDash{ to{ stroke-dashoffset:-22;} }
-        @keyframes saHalo{ 0%,100%{ transform:scale(.8); opacity:.5;} 50%{ transform:scale(1.35); opacity:1;} }
-        @keyframes saRipple{ from{ transform:scale(1); opacity:.9;} to{ transform:scale(5.5); opacity:0;} }
-        @keyframes saFly{ from{ transform:translate(-80px,var(--by));} to{ transform:translate(1520px,calc(var(--by) - 70px));} }
-        @keyframes saFlap{ from{ transform:scaleY(1);} to{ transform:scaleY(-.6);} }
-        @keyframes saSunPulse{ 0%,100%{ transform:scale(1); opacity:.85;} 50%{ transform:scale(1.12); opacity:1;} }
+        @keyframes saFadeOpen{ to{ opacity:0; visibility:hidden; } }
+        @keyframes saFade{ from{ opacity:0; transform:translateY(14px);} to{ opacity:1; transform:none;} }
+        @keyframes saWordUp{ to{ transform:translateY(0);} }
+        @keyframes saAperture{ to{ clip-path:inset(0 0 0 0);} }
+        @keyframes saStreak{ 0%{ transform:scaleX(0); opacity:1;} 55%{ transform:scaleX(1); opacity:1;} 100%{ transform:scaleX(1); opacity:0;} }
+        @keyframes saKen{ from{ transform:scale(1.02);} to{ transform:scale(1.12);} }
+        @keyframes saDrawLine{ to{ stroke-dashoffset:0;} }
+        @keyframes saBreath{ from{ transform:scale(1) rotate(-1.2deg);} to{ transform:scale(1.06) rotate(1.2deg);} }
+        @keyframes saPing{ 0%{ transform:scale(1); opacity:.7;} 100%{ transform:scale(7); opacity:0;} }
+        @keyframes saBlob{ from{ transform:translate(0,0) scale(1);} to{ transform:translate(8vw,6vh) scale(1.15);} }
+        @keyframes saShaft{ from{ transform:rotate(19deg) translateX(0); opacity:.55;} to{ transform:rotate(15deg) translateX(-4vw); opacity:1;} }
+        @keyframes saRise{ 0%{ transform:translate3d(0,0,0); opacity:0;} 12%{ opacity:.85;} 88%{ opacity:.7;} 100%{ transform:translate3d(var(--drift),-118vh,0); opacity:0;} }
+        @keyframes saTwinkle{ from{ opacity:.4; transform:scale(.9);} to{ opacity:1; transform:scale(1.1);} }
         @keyframes saGrain{ 0%{ transform:translate(0,0);} 20%{ transform:translate(-4%,3%);} 40%{ transform:translate(3%,-5%);} 60%{ transform:translate(-6%,-2%);} 80%{ transform:translate(5%,4%);} 100%{ transform:translate(0,0);} }
-        @keyframes saBlink{ 50%{ opacity:.15;} }
-        @keyframes saScrollCue{ 0%{ transform:translateY(0); opacity:1;} 100%{ transform:translateY(14px); opacity:0;} }
-        @keyframes saDraw{ to{ stroke-dashoffset:0;} }
+        @keyframes saScrollLine{ 0%{ transform:translateX(-100%);} 60%,100%{ transform:translateX(100%);} }
 
         /* ===== responsive ===== */
+        @media (max-width: 1180px){ .sa-rail{ display:none; } }
         @media (max-width: 900px){
-          .sa-hero{ padding:80px 0 190px; min-height:0; }
-          .sa-hero-inner{ grid-template-columns:1fr; gap:48px; padding:0 20px; }
-          .sa-hero-visual{ max-width:340px; }
-          .sa-chip--a{ left:-8px; } .sa-chip--b{ right:-8px; }
-          .sa-story,.sa-story--reverse{ grid-template-columns:1fr; gap:44px; padding:0 20px 90px; }
-          .sa-story--reverse .sa-media{ order:-1; }
-          .sa-net{ display:none; }
-          .sa-values{ grid-template-columns:1fr; padding:0 20px; }
-          .sa-values-head,.sa-cta{ padding-left:20px; padding-right:20px; }
-          .sa-cta-card{ padding:60px 24px; }
-          .sa-mq{ font-size:1.1rem; }
-          .sa-p:nth-child(even){ display:none; } /* mobile pe kam particles */
-          .sa-scroll{ display:none; }
+          .sa-sec{ padding:0 22px; }
+          .sa-hero{ padding-top:84px; }
+          .sa-hero-row{ grid-template-columns:1fr; gap:30px; }
+          .sa-hero-row .sa-actions{ justify-content:flex-start; }
+          .sa-photo--wide{ aspect-ratio:4/3; }
+          .sa-wide{ margin-top:52px; }
+          .sa-who{ padding-top:120px; padding-bottom:110px; }
+          .sa-work-grid{ grid-template-columns:1fr; gap:44px; }
+          .sa-index-wrap{ margin-top:80px; }
+          .sa-index{ grid-template-columns:1fr; }
+          .sa-band{ margin-bottom:110px; }
+          .sa-band-media::after{ background:linear-gradient(180deg,rgba(7,17,14,.82),rgba(7,17,14,.7)); }
+          .sa-bento{ grid-template-columns:1fr; }
+          .sa-cell--0,.sa-cell--1,.sa-cell--2,.sa-cell--3{ grid-column:1; grid-row:auto; }
+          .sa-value--0{ min-height:0; }
+          .sa-value--0 .sa-value-icon{ margin-bottom:28px; }
+          .sa-cta{ padding-top:110px; }
+          .sa-cta-grid{ grid-template-columns:1fr; gap:36px; padding-top:48px; }
+          .sa-p:nth-child(even){ display:none; }
+          .sa-scrollcue{ display:none; }
+          .sa-shaft{ display:none; }
         }
 
         /* ===== reduced motion ===== */
         @media (prefers-reduced-motion: reduce){
           .sifi-about *, .sifi-about *::before, .sifi-about *::after{ animation:none !important; transition:none !important; }
-          .sa-reveal{ opacity:1 !important; filter:none !important; transform:none !important; }
-          .sa-word > span{ transform:none !important; filter:none !important; }
-          .sa-hero-copy > *, .sa-hero-visual{ opacity:1 !important; }
-          .sa-bar,.sa-particles,.sa-grain,.sa-leak{ display:none; }
+          .sa-reveal{ opacity:1 !important; transform:none !important; clip-path:none !important; }
+          .sa-word > span{ transform:none !important; }
+          .sa-hero > .sa-kicker,.sa-hero-row,.sa-meta{ opacity:1 !important; }
+          .sa-wide{ clip-path:none !important; }
+          .sa-c{ stroke-dashoffset:0 !important; }
           .sa-value-icon svg *{ stroke-dashoffset:0 !important; }
+          .sa-open,.sa-streak,.sa-particles,.sa-grain,.sa-shaft{ display:none; }
         }
       `}</style>
     </section>
