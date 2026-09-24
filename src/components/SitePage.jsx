@@ -295,17 +295,81 @@ function NewPage({ page }) {
    ========================================================================= */
 
 /* Focus areas — about text me jo areas likhe hain wahi yahan index me aate hain */
-const FOCUS_AREAS = [
-  "Healthcare and public health",
-  "Education and digital learning",
-  "Skill development",
-  "Livelihoods",
-  "Women and youth empowerment",
-  "Agriculture",
-  "Environmental sustainability",
-  "Water and sanitation",
-  "Community development",
-  "Research and social impact assessment",
+const ABOUT_IMAGES = {
+  hero: "/images/About.png",
+  community: "/images/about1.png",
+  work: "/images/about2.png",
+  belief: "/images/about3.png",
+  fallback: "/images/cover.png",
+};
+
+const WORK_AREAS = [
+  ["01", "Healthcare & Public Health", "Preventive healthcare, health camps, outreach, nutrition awareness and community health support."],
+  ["02", "Education & Digital Learning", "School support, literacy, digital learning, learning centres, scholarships and study materials."],
+  ["03", "Skill Development", "Vocational training, employability, entrepreneurship and youth or women-focused skill programmes."],
+  ["04", "Livelihood Promotion", "Self-employment, micro-enterprise development, financial literacy and income-generation activities."],
+  ["05", "Women & Girl Empowerment", "Education, health, livelihoods, leadership, financial inclusion and community-based empowerment."],
+  ["06", "Sustainable Agriculture", "Organic farming, climate-resilient agriculture, farmer training, market linkages and value addition."],
+  ["07", "Allied Livelihoods", "Livestock, dairy, fisheries, aquaculture, capacity building and livelihood development."],
+  ["08", "Environment & Climate", "Afforestation, biodiversity conservation, ecosystem protection, climate awareness and adaptation."],
+  ["09", "Renewable Energy", "Solar awareness, energy efficiency, clean technology demonstrations, research and capacity building."],
+  ["10", "WASH & Waste", "Safe drinking water, conservation, sanitation, hygiene, waste management, recycling and cleanliness."],
+  ["11", "Rural & Tribal Development", "Community institutions, essential services, local capacity building and participatory development."],
+  ["12", "Research & Impact", "Baseline studies, surveys, needs assessments, monitoring, evaluation and social impact assessment."],
+  ["13", "Child Welfare", "Education, health, nutrition, protection, learning and community support for children."],
+  ["14", "Senior Citizen Welfare", "Dignity, wellbeing, social inclusion and access to essential services for senior citizens."],
+  ["15", "Persons with Disabilities", "Inclusion, accessibility, dignity, opportunities and community participation."],
+  ["16", "Disaster Response", "Preparedness, relief, rehabilitation and recovery-oriented support during emergencies."],
+  ["17", "Digital Inclusion", "Technology for education, healthcare, skills, information, research and community services."],
+  ["18", "Sports, Arts & Heritage", "Physical wellbeing, creativity, culture, heritage, traditional knowledge and participation."],
+];
+
+const VALUES = [
+  ["Dignity", "Human dignity stays at the centre of every programme and partnership."],
+  ["Inclusion", "Opportunities must reach underserved, disadvantaged and vulnerable communities."],
+  ["Integrity", "Ethical conduct, transparency and responsible stewardship guide our decisions."],
+  ["Participation", "We work with communities, not simply for communities."],
+  ["Sustainability", "Solutions should create lasting social, economic and environmental value."],
+  ["Evidence", "Research, data, community feedback and monitoring improve our work."],
+  ["Collaboration", "Complex development challenges need partnerships across sectors."],
+  ["Accountability", "Implementation must be responsible, measurable and transparently reported."],
+  ["Innovation", "Practical ideas and technology can improve development outcomes."],
+];
+
+const APPROACH_STEPS = [
+  ["Understand", "Listen to communities and local aspirations."],
+  ["Assess", "Use surveys, baseline studies and consultations."],
+  ["Design", "Build practical interventions with clear indicators."],
+  ["Partner", "Collaborate with government, CSR, NGOs, experts and communities."],
+  ["Implement", "Deploy teams, systems and field processes."],
+  ["Monitor", "Track activities, quality, beneficiaries and progress."],
+  ["Evaluate", "Assess outcomes and learn from implementation."],
+  ["Scale", "Strengthen and replicate models that work."],
+];
+
+const FRAMEWORK = [
+  ["Health", "Accessible healthcare and stronger public-health systems."],
+  ["Learn", "Education, literacy and digital learning opportunities."],
+  ["Skill", "Skills for employment, enterprise and economic participation."],
+  ["Earn", "Sustainable livelihoods and economic empowerment."],
+  ["Empower", "Opportunities for women, youth and vulnerable communities."],
+  ["Sustain", "Environment, climate action and responsible resource management."],
+  ["Research", "Evidence, data and knowledge for better development decisions."],
+  ["Partner", "Collaborative action with institutions, CSR partners and communities."],
+];
+
+const JOURNEY = [
+  ["2017-18", "Beginning of the Social Initiative for India journey."],
+  ["Field development", "Community-oriented programmes across healthcare, education, livelihoods and social development."],
+  ["Research expansion", "Growth of baseline studies, socio-economic surveys, assessments and project-based implementation."],
+  ["Institutional expansion", "Establishment of Social Initiative for India Foundation as a Section 8 company."],
+  ["Road ahead", "Building scalable partnerships and integrated development programmes across India."],
+];
+
+const LEADERS = [
+  ["Mithilesh Pratap Singh", "Managing Director / Director", "Strategic direction, institutional development, partnerships and impact-oriented implementation.", "/images/Mithilesh Pratap Singh, Director.jpeg"],
+  ["Madhu Priya Soni", "Director", "Organisational governance, institutional development and programme direction.", ABOUT_IMAGES.fallback],
+  ["Kunal Singh Rana", "Director", "Organisational development, programme implementation and strategic growth.", ABOUT_IMAGES.fallback],
 ];
 
 /* Right side ka chapter rail */
@@ -314,8 +378,11 @@ const RAIL = [
   ["sa-ch1", "Who we are"],
   ["sa-ch2", "Our work"],
   ["sa-ch3", "Our belief"],
-  ["sa-ch4", "What guides us"],
-  ["sa-ch5", "Join us"],
+  ["sa-ch4", "Purpose"],
+  ["sa-ch5", "Values"],
+  ["sa-ch6", "Approach"],
+  ["sa-ch7", "People"],
+  ["sa-ch8", "Join us"],
 ];
 
 /* ---------- Contour lines: har ring ka aakar sin waves se thoda tedha-medha ---------- */
@@ -420,6 +487,11 @@ const VALUE_ICONS = [
 ];
 
 const ROMAN = ["I", "II", "III", "IV", "V"];
+
+function SafeImage({ src, alt, className, ...props }) {
+  const fallback = ABOUT_IMAGES.fallback;
+  return <img className={className} src={src} alt={alt} onError={(event) => { if (event.currentTarget.src !== fallback) event.currentTarget.src = fallback; }} {...props} />;
+}
 
 function AboutPage({ page }) {
   const rootRef = useRef(null);
@@ -578,7 +650,7 @@ function AboutPage({ page }) {
 
         <div className="sa-wide">
           <div className="sa-photo sa-photo--wide">
-            <img className="sa-par" data-speed=".08" src="/images/about1.png" alt="SIFI Foundation working alongside communities" />
+            <SafeImage className="sa-par" data-speed=".08" src={ABOUT_IMAGES.hero} alt="SIFI Foundation working alongside communities" />
             <span className="sa-streak" aria-hidden="true" />
           </div>
         </div>
@@ -609,7 +681,7 @@ function AboutPage({ page }) {
       <div id="sa-ch2" data-ch="2" className="sa-sec sa-work">
         <div className="sa-work-grid">
           <div className="sa-photo sa-photo--tall sa-reveal sa-reveal--clip">
-            <img className="sa-par" data-speed=".07" src="/images/about2.png" alt="SIFI Foundation community-led programmes" />
+            <SafeImage className="sa-par" data-speed=".07" src={ABOUT_IMAGES.work} alt="SIFI Foundation community-led programmes" />
           </div>
           <div className="sa-work-copy sa-reveal" style={{ "--d": ".2s" }}>
             <Kicker no={ROMAN[1]}>Our work</Kicker>
@@ -621,9 +693,10 @@ function AboutPage({ page }) {
         <div className="sa-index-wrap">
           <h3 className="sa-index-title sa-reveal">Focus areas</h3>
           <ul className="sa-index">
-            {FOCUS_AREAS.map((area, i) => (
-              <li key={area} className="sa-reveal" style={{ "--d": `${(i % 2) * 80 + Math.floor(i / 2) * 70}ms` }}>
-                <span>{area}</span>
+            {WORK_AREAS.map(([no, title, text], i) => (
+              <li key={title} className="sa-reveal" style={{ "--d": `${(i % 3) * 70 + Math.floor(i / 3) * 45}ms` }}>
+                <span><b>{no}</b>{title}</span>
+                <p>{text}</p>
               </li>
             ))}
           </ul>
@@ -633,7 +706,7 @@ function AboutPage({ page }) {
       {/* ---------------- III : belief (full-bleed cinematic band) ---------------- */}
       <div id="sa-ch3" data-ch="3" className="sa-band">
         <div className="sa-band-media">
-          <img className="sa-par" data-speed=".1" src="/images/about3.png" alt="SIFI Foundation's vision for stronger communities" />
+          <SafeImage className="sa-par" data-speed=".1" src={ABOUT_IMAGES.belief} alt="SIFI Foundation's vision for stronger communities" />
         </div>
         <div className="sa-sec sa-band-inner">
           <div className="sa-band-copy sa-reveal">
@@ -644,14 +717,37 @@ function AboutPage({ page }) {
         </div>
       </div>
 
-      {/* ---------------- IV : what guides us (bento) ---------------- */}
-      <div id="sa-ch4" data-ch="4" className="sa-sec sa-guide">
+      {/* ---------------- IV : purpose / vision / mission ---------------- */}
+      <div id="sa-ch4" data-ch="4" className="sa-sec sa-purpose">
+        <div className="sa-purpose-grid">
+          <div className="sa-purpose-copy sa-reveal">
+            <Kicker no={ROMAN[3]}>Our purpose</Kicker>
+            <h2>Development that reaches everyday life</h2>
+            <p>For us, social impact is about improving access, strengthening capabilities, creating opportunities and enabling communities to become more resilient and self-reliant.</p>
+          </div>
+          <div className="sa-purpose-cards">
+            <article className="sa-purpose-card sa-reveal" onMouseMove={spot}>
+              <span className="sa-value-icon">{VALUE_ICONS[1]}</span>
+              <h3>Our vision</h3>
+              <p>An inclusive and sustainable India where every individual and community has the opportunity to live with health, dignity, knowledge, livelihood security and equal access to opportunities.</p>
+            </article>
+            <article className="sa-purpose-card sa-reveal" style={{ "--d": "120ms" }} onMouseMove={spot}>
+              <span className="sa-value-icon">{VALUE_ICONS[0]}</span>
+              <h3>Our mission</h3>
+              <p>To improve the quality of life of underserved and vulnerable communities through equitable access to healthcare, education, livelihoods, skills, technology, essential services and sustainable development opportunities.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      {/* ---------------- V : what guides us (values) ---------------- */}
+      <div id="sa-ch5" data-ch="5" className="sa-sec sa-guide">
         <div className="sa-reveal">
-          <Kicker no={ROMAN[3]}>What guides us</Kicker>
+          <Kicker no={ROMAN[4]}>What guides us</Kicker>
           <h2 className="sa-guide-title">People, progress and possibilities</h2>
         </div>
         <div className="sa-bento">
-          {page.cards.map(([title, text], index) => (
+          {VALUES.map(([title, text], index) => (
             <div className={`sa-cell sa-cell--${index} sa-reveal`} key={title} style={{ "--d": `${index * 120}ms` }}>
               <article className={`sa-value sa-value--${index % 4}`} onMouseMove={spot}>
                 <span className="sa-value-icon">{VALUE_ICONS[index % VALUE_ICONS.length]}</span>
@@ -663,11 +759,69 @@ function AboutPage({ page }) {
         </div>
       </div>
 
-      {/* ---------------- V : join us ---------------- */}
-      <div id="sa-ch5" data-ch="5" className="sa-sec sa-cta">
+      {/* ---------------- VI : approach / framework ---------------- */}
+      <div id="sa-ch6" data-ch="6" className="sa-sec sa-process">
+        <div className="sa-reveal">
+          <Kicker>Our approach</Kicker>
+          <h2 className="sa-guide-title">From community needs to sustainable solutions</h2>
+        </div>
+        <div className="sa-process-grid">
+          {APPROACH_STEPS.map(([title, text], index) => (
+            <article key={title} className="sa-process-step sa-reveal" style={{ "--d": `${index * 70}ms` }}>
+              <b>{String(index + 1).padStart(2, "0")}</b>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+        <div className="sa-framework sa-reveal">
+          {FRAMEWORK.map(([title, text], index) => (
+            <article key={title} className="sa-framework-card" style={{ "--d": `${index * 55}ms` }}>
+              <span>{title}</span>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      {/* ---------------- VII : journey / leadership ---------------- */}
+      <div id="sa-ch7" data-ch="7" className="sa-sec sa-people">
+        <div className="sa-people-grid">
+          <div className="sa-reveal">
+            <Kicker>Our journey</Kicker>
+            <h2 className="sa-guide-title">From social initiative to stronger institutional platform</h2>
+            <div className="sa-timeline">
+              {JOURNEY.map(([year, text], index) => (
+                <article key={year} className="sa-timeline-item" style={{ "--d": `${index * 90}ms` }}>
+                  <b>{year}</b>
+                  <p>{text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+          <div className="sa-reveal" style={{ "--d": "180ms" }}>
+            <Kicker>Leadership</Kicker>
+            <div className="sa-leaders">
+              {LEADERS.map(([name, role, text, image]) => (
+                <article key={name} className="sa-leader-card">
+                  <SafeImage src={image} alt={name} />
+                  <div>
+                    <h3>{name}</h3>
+                    <b>{role}</b>
+                    <p>{text}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ---------------- VIII : join us ---------------- */}
+      <div id="sa-ch8" data-ch="8" className="sa-sec sa-cta">
         <div className="sa-cta-grid sa-reveal">
           <div>
-            <Kicker no={ROMAN[4]}>Join us</Kicker>
+            <Kicker>Join us</Kicker>
             <h2>Build lasting opportunity with us</h2>
           </div>
           <div className="sa-cta-side">
@@ -815,11 +969,13 @@ function AboutPage({ page }) {
         .sa-work-copy > p{ max-width:52ch; line-height:1.9; color:var(--sa-mist); }
         .sa-index-wrap{ margin-top:120px; }
         .sa-index-title{ font-size:1.15rem; margin-bottom:22px; color:var(--sa-brass); font-weight:500; }
-        .sa-index{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; column-gap:64px; }
-        .sa-index li{ position:relative; border-top:1px solid var(--sa-line); }
-        .sa-index li::after{ content:""; position:absolute; left:0; top:-1px; height:1px; width:100%; background:var(--sa-brass); transform:scaleX(0); transform-origin:left; transition:transform .7s var(--sa-ease); }
+        .sa-index{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--sa-line); border:1px solid var(--sa-line); }
+        .sa-index li{ position:relative; min-height:178px; padding:22px; background:rgba(243,235,219,.035); overflow:hidden; }
+        .sa-index li::after{ content:""; position:absolute; left:0; top:0; height:3px; width:100%; background:var(--sa-brass); transform:scaleX(0); transform-origin:left; transition:transform .7s var(--sa-ease); }
         .sa-index li:hover::after{ transform:scaleX(1); }
-        .sa-index li span{ display:block; padding:22px 0; font-family:"Fraunces",serif; font-size:1.2rem; color:var(--sa-mist); transition:color .4s ease, transform .6s var(--sa-ease); }
+        .sa-index li span{ display:block; font-family:"Fraunces",serif; font-size:1.14rem; line-height:1.2; color:var(--sa-cream); transition:color .4s ease, transform .6s var(--sa-ease); }
+        .sa-index li b{ display:block; margin-bottom:12px; color:var(--sa-brass); font:600 .72rem/1 "Work Sans", sans-serif; letter-spacing:.08em; }
+        .sa-index li p{ margin-top:13px; color:rgba(243,235,219,.66); font-size:.86rem; line-height:1.62; }
         .sa-index li:hover span{ color:var(--sa-cream); transform:translateX(10px); }
 
         /* ===== III : belief band ===== */
@@ -831,6 +987,19 @@ function AboutPage({ page }) {
         .sa-band-copy h2{ font-size:clamp(1.9rem,3.6vw,3rem); line-height:1.12; margin-bottom:32px; }
         .sa-quote{ margin:0; padding-left:26px; border-left:1px solid var(--sa-brass); font-family:"Fraunces",serif; font-weight:400; font-size:clamp(1.15rem,1.7vw,1.4rem); line-height:1.7; color:var(--sa-cream); }
 
+        /* ===== IV : purpose ===== */
+        .sa-purpose{ padding-bottom:170px; }
+        .sa-purpose-grid{ display:grid; grid-template-columns:.85fr 1.15fr; gap:64px; align-items:start; }
+        .sa-purpose-copy h2{ font-size:clamp(1.9rem,3.3vw,2.8rem); line-height:1.15; margin-bottom:24px; }
+        .sa-purpose-copy p{ max-width:42ch; line-height:1.85; color:var(--sa-mist); }
+        .sa-purpose-cards{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        .sa-purpose-card{ --vc:var(--sa-brass); position:relative; min-height:360px; padding:38px 34px; border:1px solid var(--sa-line); background:rgba(243,235,219,.04); overflow:hidden; }
+        .sa-purpose-card:nth-child(2){ --vc:var(--sa-sage); }
+        .sa-purpose-card::before{ content:""; position:absolute; inset:0; opacity:.85; background:radial-gradient(340px circle at var(--px,50%) var(--py,50%),color-mix(in srgb,var(--vc) 18%,transparent),transparent 68%); }
+        .sa-purpose-card > *{ position:relative; }
+        .sa-purpose-card h3{ font-size:clamp(1.6rem,2.6vw,2.2rem); margin-bottom:18px; }
+        .sa-purpose-card p{ color:var(--sa-mist); line-height:1.78; }
+
         /* ===== IV : bento ===== */
         .sa-guide{ padding-bottom:0; }
         .sa-guide-title{ font-size:clamp(1.9rem,3.3vw,2.8rem); line-height:1.15; max-width:18ch; margin-bottom:52px; }
@@ -839,6 +1008,11 @@ function AboutPage({ page }) {
         .sa-cell--1{ grid-column:7 / span 6; }
         .sa-cell--2{ grid-column:7 / span 3; }
         .sa-cell--3{ grid-column:10 / span 3; }
+        .sa-cell--4{ grid-column:1 / span 3; }
+        .sa-cell--5{ grid-column:4 / span 3; }
+        .sa-cell--6{ grid-column:7 / span 3; }
+        .sa-cell--7{ grid-column:10 / span 3; }
+        .sa-cell--8{ grid-column:1 / span 12; }
         .sa-value{ --vc:var(--sa-brass); position:relative; height:100%; overflow:hidden; padding:40px 36px; border-radius:3px; border:1px solid var(--sa-line); background:rgba(243,235,219,.035); backdrop-filter:blur(12px); transition:border-color .5s ease, background .5s ease; }
         .sa-value--1{ --vc:var(--sa-sage); } .sa-value--2{ --vc:var(--sa-clay); } .sa-value--3{ --vc:#B3A6F5; }
         .sa-value::before{ content:""; position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .5s ease; background:radial-gradient(320px circle at var(--px,50%) var(--py,50%),color-mix(in srgb,var(--vc) 20%,transparent),transparent 65%); }
@@ -858,7 +1032,37 @@ function AboutPage({ page }) {
         .sa-value--0 h3{ font-size:clamp(1.8rem,2.8vw,2.4rem); }
         .sa-value--0 p{ font-family:"Fraunces",serif; font-size:clamp(1.1rem,1.6vw,1.35rem); line-height:1.6; max-width:28em; }
 
-        /* ===== V : cta ===== */
+        /* ===== VI : approach / framework ===== */
+        .sa-process{ padding-top:170px; padding-bottom:170px; }
+        .sa-process-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--sa-line); border:1px solid var(--sa-line); }
+        .sa-process-step{ min-height:210px; padding:28px 24px; background:rgba(243,235,219,.035); }
+        .sa-process-step b{ color:var(--sa-brass); font-size:.8rem; letter-spacing:.1em; }
+        .sa-process-step h3{ margin:20px 0 12px; font-size:1.35rem; }
+        .sa-process-step p{ color:var(--sa-mist); line-height:1.65; font-size:.93rem; }
+        .sa-framework{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:42px; }
+        .sa-framework-card{ position:relative; padding:24px 22px; border:1px solid var(--sa-line); background:linear-gradient(145deg,rgba(217,165,75,.09),rgba(134,184,167,.045)); overflow:hidden; }
+        .sa-framework-card::before{ content:""; position:absolute; inset:auto 18px 0; height:2px; background:var(--sa-brass); transform:scaleX(0); transform-origin:left; animation:saFrameLine 2.2s var(--sa-ease) var(--d,0s) infinite alternate; }
+        .sa-framework-card span{ display:block; color:var(--sa-brass); font:600 1rem/1 "Fraunces",serif; text-transform:uppercase; letter-spacing:.06em; margin-bottom:11px; }
+        .sa-framework-card p{ color:rgba(243,235,219,.72); line-height:1.6; font-size:.86rem; }
+
+        /* ===== VII : journey / leadership ===== */
+        .sa-people{ padding-bottom:0; }
+        .sa-people-grid{ display:grid; grid-template-columns:.95fr 1.05fr; gap:64px; align-items:start; }
+        .sa-timeline{ position:relative; display:grid; gap:18px; }
+        .sa-timeline::before{ content:""; position:absolute; left:8px; top:4px; bottom:4px; width:1px; background:var(--sa-line); }
+        .sa-timeline-item{ position:relative; padding-left:36px; }
+        .sa-timeline-item::before{ content:""; position:absolute; left:3px; top:7px; width:11px; height:11px; border-radius:50%; background:var(--sa-night); border:1px solid var(--sa-brass); box-shadow:0 0 0 0 rgba(217,165,75,.25); animation:saDotPulse 3.4s ease-in-out infinite; }
+        .sa-timeline-item b{ display:block; color:var(--sa-brass); font-size:.88rem; margin-bottom:7px; }
+        .sa-timeline-item p{ color:var(--sa-mist); line-height:1.65; }
+        .sa-leaders{ display:grid; gap:16px; }
+        .sa-leader-card{ display:grid; grid-template-columns:86px 1fr; gap:18px; align-items:center; padding:18px; border:1px solid var(--sa-line); background:rgba(243,235,219,.035); transition:transform .45s var(--sa-ease), border-color .45s ease; }
+        .sa-leader-card:hover{ transform:translateX(8px); border-color:rgba(217,165,75,.55); }
+        .sa-leader-card img{ width:86px; height:86px; object-fit:cover; border:1px solid var(--sa-line); filter:saturate(1.02) contrast(1.02); }
+        .sa-leader-card h3{ font-size:1.22rem; margin-bottom:4px; }
+        .sa-leader-card b{ display:block; color:var(--sa-brass); font-size:.82rem; margin-bottom:8px; }
+        .sa-leader-card p{ color:rgba(243,235,219,.72); line-height:1.55; font-size:.9rem; }
+
+        /* ===== VIII : cta ===== */
         .sa-cta{ padding-top:170px; }
         .sa-cta-grid{ display:grid; grid-template-columns:1.2fr .8fr; gap:72px; align-items:end; padding:72px 0 0; border-top:1px solid var(--sa-line); }
         .sa-cta h2{ font-size:clamp(2.2rem,4.8vw,4rem); line-height:1.08; max-width:12em; }
@@ -880,6 +1084,8 @@ function AboutPage({ page }) {
         @keyframes saTwinkle{ from{ opacity:.4; transform:scale(.9);} to{ opacity:1; transform:scale(1.1);} }
         @keyframes saGrain{ 0%{ transform:translate(0,0);} 20%{ transform:translate(-4%,3%);} 40%{ transform:translate(3%,-5%);} 60%{ transform:translate(-6%,-2%);} 80%{ transform:translate(5%,4%);} 100%{ transform:translate(0,0);} }
         @keyframes saScrollLine{ 0%{ transform:translateX(-100%);} 60%,100%{ transform:translateX(100%);} }
+        @keyframes saFrameLine{ to{ transform:scaleX(1); opacity:.35;} }
+        @keyframes saDotPulse{ 50%{ box-shadow:0 0 0 8px rgba(217,165,75,.08); } }
 
         /* ===== responsive ===== */
         @media (max-width: 1180px){ .sa-rail{ display:none; } }
@@ -896,10 +1102,16 @@ function AboutPage({ page }) {
           .sa-index{ grid-template-columns:1fr; }
           .sa-band{ margin-bottom:110px; }
           .sa-band-media::after{ background:linear-gradient(180deg,rgba(7,17,14,.82),rgba(7,17,14,.7)); }
+          .sa-purpose{ padding-bottom:110px; }
+          .sa-purpose-grid,.sa-purpose-cards{ grid-template-columns:1fr; gap:24px; }
+          .sa-purpose-card{ min-height:0; }
           .sa-bento{ grid-template-columns:1fr; }
-          .sa-cell--0,.sa-cell--1,.sa-cell--2,.sa-cell--3{ grid-column:1; grid-row:auto; }
+          .sa-cell--0,.sa-cell--1,.sa-cell--2,.sa-cell--3,.sa-cell--4,.sa-cell--5,.sa-cell--6,.sa-cell--7,.sa-cell--8{ grid-column:1; grid-row:auto; }
           .sa-value--0{ min-height:0; }
           .sa-value--0 .sa-value-icon{ margin-bottom:28px; }
+          .sa-process{ padding-top:110px; padding-bottom:110px; }
+          .sa-process-grid,.sa-framework{ grid-template-columns:1fr; }
+          .sa-people-grid{ grid-template-columns:1fr; gap:58px; }
           .sa-cta{ padding-top:110px; }
           .sa-cta-grid{ grid-template-columns:1fr; gap:36px; padding-top:48px; }
           .sa-p:nth-child(even){ display:none; }
