@@ -303,6 +303,18 @@ const ABOUT_IMAGES = {
   fallback: "/images/cover.png",
 };
 
+const VALUE_BACKGROUNDS = [
+  "/images/about1.png",
+  "/images/digital-learning-corners.jpg",
+  "/images/about2.png",
+  "/images/community-meal-support.png",
+  "/images/about3.png",
+  "/images/health-rights-confidence.png",
+  "/images/mobile-health-camp-support.jpg",
+  "/images/relief-for-elderly-families.png",
+  "/images/festival-food-kits.png",
+];
+
 const WORK_AREAS = [
   ["01", "Healthcare & Public Health", "Preventive healthcare, health camps, outreach, nutrition awareness and community health support."],
   ["02", "Education & Digital Learning", "School support, literacy, digital learning, learning centres, scholarships and study materials."],
@@ -665,16 +677,26 @@ function AboutPage({ page }) {
 
       {/* ---------------- I : who we are (scroll se jalte words) ---------------- */}
       <div id="sa-ch1" data-ch="1" className="sa-sec sa-who">
-        <div className="sa-reveal">
-          <Kicker no={ROMAN[0]}>Who we are</Kicker>
+        <div className="sa-who-media" aria-hidden="true">
+          <SafeImage className="sa-par" data-speed=".06" src={ABOUT_IMAGES.community} alt="" />
         </div>
-        <p className="sa-statement" aria-label={paragraphs[1]}>
-          {statementWords.map((w, i) => (
-            <span key={`${w}-${i}`}>
-              <span className="sa-w" aria-hidden="true">{w}</span>{" "}
-            </span>
-          ))}
-        </p>
+        <div className="sa-who-content">
+          <div className="sa-reveal">
+            <Kicker no={ROMAN[0]}>Who we are</Kicker>
+          </div>
+          <p className="sa-statement" aria-label={paragraphs[1]}>
+            {statementWords.map((w, i) => (
+              <span key={`${w}-${i}`}>
+                <span className="sa-w" aria-hidden="true">{w}</span>{" "}
+              </span>
+            ))}
+          </p>
+          <div className="sa-who-note sa-reveal">
+            <span>Community first</span>
+            <span>Evidence informed</span>
+            <span>Built to last</span>
+          </div>
+        </div>
       </div>
 
       {/* ---------------- II : our work ---------------- */}
@@ -682,11 +704,21 @@ function AboutPage({ page }) {
         <div className="sa-work-grid">
           <div className="sa-photo sa-photo--tall sa-reveal sa-reveal--clip">
             <SafeImage className="sa-par" data-speed=".07" src={ABOUT_IMAGES.work} alt="SIFI Foundation community-led programmes" />
+            <div className="sa-work-caption">
+              <b>18</b>
+              <span>connected areas of action</span>
+            </div>
           </div>
           <div className="sa-work-copy sa-reveal" style={{ "--d": ".2s" }}>
             <Kicker no={ROMAN[1]}>Our work</Kicker>
             <h2>Working with communities to create lasting opportunity</h2>
             <p>{paragraphs[2]}</p>
+            <div className="sa-work-principles" aria-label="Our working principles">
+              <span>Listen</span><i aria-hidden="true" />
+              <span>Co-create</span><i aria-hidden="true" />
+              <span>Measure</span><i aria-hidden="true" />
+              <span>Scale</span>
+            </div>
           </div>
         </div>
 
@@ -749,7 +781,11 @@ function AboutPage({ page }) {
         <div className="sa-bento">
           {VALUES.map(([title, text], index) => (
             <div className={`sa-cell sa-cell--${index} sa-reveal`} key={title} style={{ "--d": `${index * 120}ms` }}>
-              <article className={`sa-value sa-value--${index % 4}`} onMouseMove={spot}>
+              <article
+                className={`sa-value sa-value--${index % 4}`}
+                style={{ "--card-image": `url("${VALUE_BACKGROUNDS[index]}")` }}
+                onMouseMove={spot}
+              >
                 <span className="sa-value-icon">{VALUE_ICONS[index % VALUE_ICONS.length]}</span>
                 <h3>{title}</h3>
                 <p>{text}</p>
@@ -956,17 +992,30 @@ function AboutPage({ page }) {
         .sa-scrollcue u::after{ content:""; position:absolute; inset:0; background:var(--sa-brass); transform:translateX(-100%); animation:saScrollLine 3s ease-in-out infinite; }
 
         /* ===== I : who we are ===== */
-        .sa-who{ padding-top:180px; padding-bottom:170px; }
+        .sa-who{ padding-top:180px; padding-bottom:170px; overflow:hidden; min-height:760px; display:flex; align-items:center; }
+        .sa-who::after{ content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg,var(--sa-night) 2%,rgba(7,17,14,.78) 48%,rgba(7,17,14,.3) 100%),linear-gradient(180deg,var(--sa-night),transparent 24%,transparent 76%,var(--sa-night)); }
+        .sa-who-media{ position:absolute; z-index:-2; inset:50px 40px; overflow:hidden; opacity:.38; -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 18%,#000 100%); mask-image:linear-gradient(90deg,transparent 0,#000 18%,#000 100%); }
+        .sa-who-media img{ position:absolute; inset:-8% 0; width:100%; height:116%; object-fit:cover; filter:saturate(.78) contrast(1.12); animation:saKen 30s ease-in-out infinite alternate; }
+        .sa-who-content{ position:relative; width:100%; }
         .sa-statement{ max-width:24em; font-family:"Fraunces",serif; font-weight:400; font-size:clamp(1.7rem,3.3vw,2.85rem); line-height:1.32; letter-spacing:-.012em; }
         .sa-w{ color:rgba(243,235,219,.17); transition:color .7s ease; }
         .sa-w.on{ color:var(--sa-cream); }
+        .sa-who-note{ display:flex; align-items:center; gap:14px; margin-top:44px; color:rgba(243,235,219,.72); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; }
+        .sa-who-note span{ display:inline-flex; align-items:center; gap:14px; }
+        .sa-who-note span:not(:last-child)::after{ content:""; width:28px; height:1px; background:var(--sa-brass); opacity:.7; }
 
         /* ===== II : our work ===== */
         .sa-work{ padding-bottom:170px; }
         .sa-work-grid{ display:grid; grid-template-columns:5fr 6fr; gap:clamp(48px,8vw,120px); align-items:center; }
         .sa-photo--tall{ aspect-ratio:4/5; border:1px solid var(--sa-line); box-shadow:0 50px 90px -40px rgba(0,0,0,.85); }
+        .sa-photo--tall::after{ content:""; position:absolute; inset:0; z-index:1; background:linear-gradient(180deg,transparent 48%,rgba(7,17,14,.88) 100%); }
+        .sa-work-caption{ position:absolute; z-index:3; left:28px; right:28px; bottom:25px; display:flex; align-items:flex-end; gap:14px; border-top:1px solid rgba(243,235,219,.35); padding-top:16px; }
+        .sa-work-caption b{ color:var(--sa-brass); font:500 clamp(2.3rem,4vw,4rem)/.8 "Fraunces",serif; }
+        .sa-work-caption span{ max-width:12ch; color:var(--sa-cream); font-size:.78rem; line-height:1.35; text-transform:uppercase; letter-spacing:.06em; }
         .sa-work-copy h2{ font-size:clamp(1.9rem,3.3vw,2.8rem); line-height:1.15; margin-bottom:26px; }
         .sa-work-copy > p{ max-width:52ch; line-height:1.9; color:var(--sa-mist); }
+        .sa-work-principles{ display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-top:32px; padding-top:22px; border-top:1px solid var(--sa-line); color:var(--sa-cream); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; }
+        .sa-work-principles i{ width:5px; height:5px; border-radius:50%; background:var(--sa-brass); box-shadow:0 0 0 4px rgba(217,165,75,.1); }
         .sa-index-wrap{ margin-top:120px; }
         .sa-index-title{ font-size:1.15rem; margin-bottom:22px; color:var(--sa-brass); font-weight:500; }
         .sa-index{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--sa-line); border:1px solid var(--sa-line); }
@@ -1013,13 +1062,13 @@ function AboutPage({ page }) {
         .sa-cell--6{ grid-column:7 / span 3; }
         .sa-cell--7{ grid-column:10 / span 3; }
         .sa-cell--8{ grid-column:1 / span 12; }
-        .sa-value{ --vc:var(--sa-brass); position:relative; height:100%; overflow:hidden; padding:40px 36px; border-radius:3px; border:1px solid var(--sa-line); background:rgba(243,235,219,.035); backdrop-filter:blur(12px); transition:border-color .5s ease, background .5s ease; }
+        .sa-value{ --vc:var(--sa-brass); position:relative; isolation:isolate; height:100%; overflow:hidden; padding:40px 36px; border-radius:3px; border:1px solid var(--sa-line); background:rgba(7,17,14,.7); backdrop-filter:blur(12px); transition:border-color .5s ease, background .5s ease; }
         .sa-value--1{ --vc:var(--sa-sage); } .sa-value--2{ --vc:var(--sa-clay); } .sa-value--3{ --vc:#B3A6F5; }
-        .sa-value::before{ content:""; position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .5s ease; background:radial-gradient(320px circle at var(--px,50%) var(--py,50%),color-mix(in srgb,var(--vc) 20%,transparent),transparent 65%); }
-        .sa-value::after{ content:""; position:absolute; left:0; top:0; width:100%; height:2px; background:var(--vc); transform:scaleX(0); transform-origin:left; transition:transform .8s var(--sa-ease); }
+        .sa-value::before{ content:""; position:absolute; z-index:-2; inset:0; pointer-events:none; opacity:.2; background-image:var(--card-image); background-position:center; background-size:cover; filter:saturate(.82) contrast(1.1); transform:scale(1.02); transition:opacity .7s ease,transform 1.2s var(--sa-ease); }
+        .sa-value::after{ content:""; position:absolute; z-index:-1; inset:0; pointer-events:none; background:radial-gradient(320px circle at var(--px,50%) var(--py,50%),color-mix(in srgb,var(--vc) 22%,transparent),transparent 65%),linear-gradient(150deg,rgba(7,17,14,.82),rgba(7,17,14,.62)); border-top:2px solid transparent; transition:border-color .8s var(--sa-ease); }
         .sa-value:hover{ border-color:color-mix(in srgb,var(--vc) 55%,transparent); background:rgba(243,235,219,.05); }
-        .sa-value:hover::before{ opacity:1; }
-        .sa-value:hover::after{ transform:scaleX(1); }
+        .sa-value:hover::before{ opacity:.34; transform:scale(1.09); }
+        .sa-value:hover::after{ border-top-color:var(--vc); }
         .sa-value > *{ position:relative; }
         .sa-value-icon{ display:inline-flex; width:44px; height:44px; margin-bottom:26px; color:var(--vc); }
         .sa-value-icon svg{ width:100%; height:100%; }
@@ -1097,6 +1146,11 @@ function AboutPage({ page }) {
           .sa-photo--wide{ aspect-ratio:4/3; }
           .sa-wide{ margin-top:52px; }
           .sa-who{ padding-top:120px; padding-bottom:110px; }
+          .sa-who-media{ inset:36px 0; opacity:.3; -webkit-mask-image:linear-gradient(180deg,transparent,#000 18%,#000 82%,transparent); mask-image:linear-gradient(180deg,transparent,#000 18%,#000 82%,transparent); }
+          .sa-who::after{ background:linear-gradient(180deg,var(--sa-night),rgba(7,17,14,.66) 30%,rgba(7,17,14,.78) 76%,var(--sa-night)); }
+          .sa-who-note{ align-items:flex-start; gap:9px; }
+          .sa-who-note span{ gap:9px; }
+          .sa-who-note span:not(:last-child)::after{ width:10px; }
           .sa-work-grid{ grid-template-columns:1fr; gap:44px; }
           .sa-index-wrap{ margin-top:80px; }
           .sa-index{ grid-template-columns:1fr; }
