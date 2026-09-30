@@ -26,8 +26,11 @@ export const createOrder = asyncHandler(async (req, res) => {
   const values = Object.fromEntries(settings.map((row) => [row.key, row.value]));
   if (amount < Math.max(1, Number(values.minimum_amount) || 1)) throw new ApiError(422, "Amount is below the minimum donation");
   if (req.body.gatewayId && Number(req.body.gatewayId) !== gateway.id) throw new ApiError(409, "The payment gateway has changed. Refresh this page and try again.");
-  const phone = String(req.body.phone || req.user.phone || "").trim();
-  if (gateway.provider === "cashfree" && !/^\+?[0-9]{10,15}$/.test(phone)) throw new ApiError(422, "Please enter a valid phone number for Cashfree checkout");
+  const suppliedPhone = String(req.body.phone || req.user.phone || "").trim();
+  const digits = suppliedPhone.replace(/\D/g, "");
+  const nationalPhone = digits.startsWith("91") && digits.length === 12 ? digits.slice(2) : digits;
+  if (!/^[6-9][0-9]{9}$/.test(nationalPhone)) throw new ApiError(422, "Please enter a valid 10-digit Indian mobile number");
+  const phone = `+91${nationalPhone}`;
   const credentials = { provider: gateway.provider, mode: gateway.mode, publicKey: gateway.publicKey, secretKey: decryptSecret(gateway.secretKey) };
   const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173").split(",").map((value) => value.trim().replace(/\/$/, ""));
   const returnUrl = allowedOrigins.includes(req.get("origin")) ? req.get("origin") : allowedOrigins[0];

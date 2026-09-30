@@ -35,7 +35,19 @@ function DonationPage({ modal = false, onClose }) {
   const [configLoading, setConfigLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [phone, setPhone] = useState("");
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [phoneOverflow, setPhoneOverflow] = useState(false);
   const verifiedReturn = useRef(null);
+  const phoneError = phoneOverflow
+    ? "Mobile number cannot be more than 10 digits."
+    : phoneTouched && !/^[6-9][0-9]{9}$/.test(phone)
+      ? phone.length > 0 ? "Enter a valid 10-digit Indian mobile number starting with 6, 7, 8 or 9." : "Mobile number is required."
+      : "";
+  useEffect(() => {
+    if (!user?.phone || phone) return;
+    const digits = String(user.phone).replace(/\D/g, "");
+    setPhone((digits.startsWith("91") && digits.length === 12 ? digits.slice(2) : digits).slice(-10));
+  }, [user?.phone, phone]);
   useEffect(() => {
     let current = true;
     const load = () => api("/donations/config").then((data) => { if (current) { setGateway(data.gateway); setConfigLoading(false); } }).catch(() => { if (current) { setGateway(null); setConfigLoading(false); } });
@@ -56,6 +68,12 @@ function DonationPage({ modal = false, onClose }) {
   }, [user]);
 
   const chooseAmount = (value) => setAmount(String(value));
+  const updatePhone = (event) => {
+    const digits = event.target.value.replace(/\D/g, "");
+    setPhoneTouched(true);
+    setPhoneOverflow(digits.length > 10);
+    setPhone(digits.slice(0, 10));
+  };
   const proceed = async (event) => {
     event.preventDefault();
     if (busy) return;
@@ -67,9 +85,12 @@ function DonationPage({ modal = false, onClose }) {
     }
     const numericAmount = Number(amount);
     if (!Number.isFinite(numericAmount) || numericAmount < minimum) { setMessage("Please enter at least INR " + minimum + "."); return; }
+    setPhoneTouched(true);
+    if (!/^[6-9][0-9]{9}$/.test(phone)) { setMessage("Please enter a valid 10-digit Indian mobile number."); return; }
     setBusy(true); setMessage("");
     try {
-      const data = await api("/donations/create-order", { method: "POST", body: { amount: numericAmount, donorName: user.name, email: user.email, phone: phone || user.phone, gatewayId: gateway?.id, message: frequency + " donation for " + purpose } });
+      const fullPhone = "+91" + phone;
+      const data = await api("/donations/create-order", { method: "POST", body: { amount: numericAmount, donorName: user.name, email: user.email, phone: fullPhone, donationType: frequency, gatewayId: gateway?.id, message: frequency + " donation for " + purpose } });
       if (data.provider === "stripe") { window.location.assign(data.checkoutUrl); return; }
       await loadCheckout(data.provider);
       if (data.provider === "cashfree") {
@@ -80,7 +101,7 @@ function DonationPage({ modal = false, onClose }) {
       const checkout = new window.Razorpay({
         key: data.publicKey, amount: data.order.amount, currency: data.order.currency,
         name: settings.general?.website_name || "SIFI Foundation", description: "Donation for " + purpose,
-        order_id: data.order.id, prefill: { name: user.name, email: user.email, contact: phone || user.phone || "" },
+        order_id: data.order.id, prefill: { name: user.name, email: user.email, contact: "+91" + phone },
         handler: async (payment) => {
           try {
             const verified = await api("/donations/verify", { method: "POST", body: { ...payment, donationId: data.donation.id } });
@@ -112,7 +133,9 @@ function DonationPage({ modal = false, onClose }) {
           {citizen === "indian" ? <p className="passport-note"><Info /> For Indian Passport holders</p> : <p className="passport-note"><Info /> For foreign citizens and OCI card holders</p>}
 
           <form onSubmit={proceed}>
-            <div className="frequency-tabs"><span><Heart /> One-time donation</span></div>
+            <div className="frequency-tabs" aria-label="Donation frequency">
+              <button type="button" className="active" aria-pressed="true"><Heart /> One-time donation</button>
+            </div>
 
             <div className="amount-options" aria-label="Select donation amount">
               {amounts.map((value) => <button key={value} type="button" className={amount === String(value) ? "active" : ""} onClick={() => chooseAmount(value)}>₹{value}</button>)}
@@ -134,7 +157,14 @@ function DonationPage({ modal = false, onClose }) {
               </select>
             </label>
 
-            <label className="donation-field"><span>Phone {gateway?.provider === "cashfree" ? "*" : ""}</span><input type="tel" value={phone || user?.phone || ""} onChange={(event) => setPhone(event.target.value)} required={gateway?.provider === "cashfree"} /></label>
+            <label className={`donation-field phone-field${phoneError ? " has-error" : ""}`}>
+              <span>Mobile Number <b>*</b></span>
+              <span className="phone-input-wrap">
+                <span className="phone-prefix" aria-hidden="true">+91</span>
+                <input type="tel" inputMode="numeric" autoComplete="tel-national" value={phone} onChange={updatePhone} onBlur={() => setPhoneTouched(true)} pattern="[6-9][0-9]{9}" placeholder="10-digit mobile number" aria-invalid={Boolean(phoneError)} aria-describedby="donation-phone-error" required />
+              </span>
+              <small id="donation-phone-error" className="field-error" aria-live="polite">{phoneError}</small>
+            </label>
             <p role="status">{configLoading ? "Loading payment options..." : gateway ? "Secure checkout with " + gateway.name : "Online donations are currently unavailable. Please contact our team."}</p>
             {donationSettings.donation_note && <p>{donationSettings.donation_note}</p>}
             <button className="proceed-donation" type="submit" disabled={busy || configLoading || authLoading || !gateway}>{busy ? "Processing..." : "Proceed to Donate"}</button>

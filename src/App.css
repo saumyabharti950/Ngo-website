@@ -1638,7 +1638,7 @@
 .citizen-tabs button.active svg { color: #58ca7c; }
 .passport-note { margin: 12px 0 25px; min-height: 42px; padding: 11px 24px; border-radius: 5px; background: #fff4cf; color: #082338; display: flex; align-items: center; gap: 8px; font-size: 15px; }
 .passport-note svg { width: 17px; fill: currentColor; }
-.frequency-tabs { grid-template-columns: 1fr 1fr; gap: 0; }
+.frequency-tabs { grid-template-columns: 1fr; gap: 0; }
 .frequency-tabs button { height: 60px; border: 0; background: #eeeeee; display: flex; align-items: center; justify-content: center; gap: 12px; color: #050505; font-size: 17px; }
 .frequency-tabs button.active { background: #ffcb08; }
 .frequency-tabs svg { color: red; width: 24px; }
@@ -1651,6 +1651,12 @@
 .amount-field { grid-template-columns: 40% 60%; }
 .purpose-field { grid-template-columns: 51% 49%; background: #e8e8e8; }
 .donation-field input, .donation-field select { width: 100%; height: 50px; padding: 0 20px; border: 1px solid #d2d6d9; border-radius: 5px; background: #fff; color: #6c747b; font-size: 19px; outline: none; }
+.phone-input-wrap { display: grid; grid-template-columns: auto 1fr; align-items: center; border: 1px solid #d2d6d9; border-radius: 5px; background: #fff; overflow: hidden; }
+.phone-input-wrap .phone-prefix { display: grid; place-items: center; align-self: stretch; padding: 0 14px; border-right: 1px solid #d2d6d9; background: #f3f6f4; color: #173d2a; font-size: 17px; font-weight: 800; }
+.phone-input-wrap input { border: 0; border-radius: 0; }
+.phone-input-wrap:focus-within { border-color: #176b3a; box-shadow: 0 0 0 3px rgba(23, 107, 58, .12); }
+.donation-field.has-error .phone-input-wrap { border-color: #c73535; box-shadow: 0 0 0 3px rgba(199, 53, 53, .1); }
+.donation-field .field-error { min-height: 18px; margin-top: 4px; color: #b42318; font-size: 12px; font-weight: 700; }
 .amount-field input { border: 2px solid #f3bb00; }
 .purpose-field span { padding-left: 12px; color: #000; }
 .proceed-donation { width: 100%; height: 51px; margin-top: 12px; border: 0; border-radius: 5px; background: #0d2b37; color: white; font-size: 17px; font-weight: 700; }
