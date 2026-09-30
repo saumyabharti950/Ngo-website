@@ -15,7 +15,7 @@ const navigation = [
   { href: "/careers", label: "Careers" },
   { href: "/get-involved", label: "Get Involved" },
   { href: "/blog", label: "Blog" },
-  { href: "/contact", label: "Contact" }
+  { href: "/contact", label: "Reach Us" }
 ];
 
 function Navbar({ preview = false, path = '/' }) {
@@ -69,7 +69,7 @@ function Navbar({ preview = false, path = '/' }) {
                 <button type="button" onClick={logout}><LogOut size={15} />Logout</button>
               </div>
             </div>
-          ) : <a className="nav-login" href="/login"><UserRound size={16}/><span>Login</span></a>}
+          ) : <a className="nav-login" href="/login"><UserRound size={16}/><span>Officials</span></a>}
           <button type="button" className="mobile-menu" onClick={() => setMobileOpen(!mobileOpen)} aria-expanded={mobileOpen} aria-controls="mobile-navigation" aria-label={mobileOpen ? "Close navigation" : "Open navigation"}>{mobileOpen ? <X size={23} /> : <Menu size={23} />}</button>
         </div>
       </div>
