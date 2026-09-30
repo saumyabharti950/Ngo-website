@@ -12,6 +12,7 @@ const navigation = [
   { href: "/take-action", label: "Take Action", items: [["/campaigns", "Campaigns"], ["/volunteer", "Volunteer with us"], ["/donate", "Donate"]] },
   { href: "/work", label: "Our Work", items: [["/programmes", "Programmes"], ["/impact-stories", "Impact stories"], ["/gallery", "Gallery"]] },
   { href: "/impact-stories", label: "Impact Stories" },
+  { href: "/careers", label: "Careers" },
   { href: "/get-involved", label: "Get Involved" },
   { href: "/blog", label: "Blog" },
   { href: "/contact", label: "Contact" }
