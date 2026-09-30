@@ -56,6 +56,22 @@ export async function uploadFile(scope, file) {
   return payload.data;
 }
 
+export async function apiForm(path, formData, options = {}) {
+  tokenStore.hydrate();
+  const headers = { ...(options.headers || {}) };
+  const token = tokenStore.get();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers, body: formData });
+  } catch {
+    throw new Error("Unable to reach the API server. Start the backend server, then try again.");
+  }
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || payload.success === false) throw new Error(payload.message || "Request failed");
+  return payload.data;
+}
+
 export function assetUrl(value) {
   if (!value) return "";
   if (value.startsWith("http") || value.startsWith("/images/")) return value;

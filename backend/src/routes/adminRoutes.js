@@ -8,6 +8,7 @@ import { upload } from "../middleware/upload.js";
 import { uploadFile } from "../controllers/uploadController.js";
 import { listGateways, saveGateway, activateGateway, deactivateGateway, deleteGateway } from "../controllers/paymentGatewayController.js";
 import { listPageSliders, savePageSlider } from "../controllers/pageSliderController.js";
+import { adminApplications, adminCareerPosts, deleteCareerPost, saveCareerPost, updateApplicationStatus } from "../controllers/careerController.js";
 
 const router = Router();
 router.get("/page-sliders", authorize("settings.view"), listPageSliders);
@@ -19,6 +20,12 @@ router.post("/payment-gateways/:id/activate", authorize("settings.edit"), activa
 router.post("/payment-gateways/:id/deactivate", authorize("settings.edit"), deactivateGateway);
 router.delete("/payment-gateways/:id", authorize("settings.edit"), deleteGateway);
 router.get("/dashboard", dashboard);
+router.get("/careers", authorize("careers.view"), adminCareerPosts);
+router.post("/careers", authorize("careers.create"), saveCareerPost);
+router.put("/careers/:id", authorize("careers.edit"), saveCareerPost);
+router.delete("/careers/:id", authorize("careers.delete"), deleteCareerPost);
+router.get("/career-applications", authorize("career_applications.view"), adminApplications);
+router.patch("/career-applications/:id", authorize("career_applications.edit"), updateApplicationStatus);
 router.get("/users", authorize("users.view"), listUsers);
 router.post("/users", authorize("users.create"), createUser);
 router.put("/users/:id", authorize("users.edit"), updateUser);

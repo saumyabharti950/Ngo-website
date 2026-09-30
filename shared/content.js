@@ -22,11 +22,17 @@ export const moduleFields = {
     long: ["description", "content", "metaDescription"],
     images: ["featuredImage", "image1", "image2", "image3", "image4"],
     payload: ["tags"]
+  },
+  notices: {
+    text: ["title", "slug", "shortDescription", "category", "eventDate", "websiteUrl", "sortOrder"],
+    long: ["description", "content"],
+    images: ["featuredImage", "image1", "image2", "image3", "image4"],
+    payload: ["tags", "videoUrl"]
   }
 };
 
-export const contentPaths = { gallery: "/gallery", programmes: "/programmes", impact_stories: "/impact-stories", blogs: "/blog" };
-export const contentTitles = { gallery: "Gallery", programmes: "Programmes", impact_stories: "Impact Stories", blogs: "Blogs" };
+export const contentPaths = { gallery: "/gallery", programmes: "/programmes", impact_stories: "/impact-stories", blogs: "/blog", notices: "/notices" };
+export const contentTitles = { gallery: "Gallery", programmes: "Programmes", impact_stories: "Impact Stories", blogs: "Blogs", notices: "Notices" };
 
 const contentColumns = new Set(["title", "slug", "shortDescription", "description", "content", "category", "tags", "metaTitle", "metaDescription", "featuredImage", "image1", "image2", "image3", "image4", "videoUrl", "status", "featured", "sortOrder"]);
 export function contentPreviewItem(form, module) {

@@ -3,8 +3,8 @@ import ContentEditor from "./ContentEditor";
 import PageSliderEditor from "./PageSliderEditor";
 import { useEffect, useMemo, useState } from "react";
 import {
-  BarChart3, ChevronDown, Eye, FileText, GalleryHorizontal, HandHeart, LayoutDashboard,
-  LogOut, MessageSquare, Pencil, Plus, Settings, ShieldCheck, Trash2, UserRound, UsersRound
+  BarChart3, BriefcaseBusiness, ChevronDown, Eye, FileText, GalleryHorizontal, HandHeart, LayoutDashboard,
+  LogOut, Megaphone, MessageSquare, Pencil, Plus, Settings, ShieldCheck, Trash2, UserRound, UsersRound
 } from "lucide-react";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
@@ -13,6 +13,7 @@ import PaymentGateways from "./PaymentGateways";
 
 const contentModules = {
   "/admin/gallery": { module: "gallery", permission: "gallery", title: "Gallery" },
+  "/admin/notices": { module: "notices", permission: "notices", title: "Notices" },
   "/admin/programmes": { module: "programmes", permission: "programmes", title: "Programmes" },
   "/admin/impact-stories": { module: "impact_stories", permission: "impact_stories", title: "Impact Stories" },
   "/admin/blogs": { module: "blogs", permission: "blogs", title: "Blogs" }
@@ -28,9 +29,14 @@ const menuGroups = [
   ] },
   { label: "CMS", icon: FileText, items: [
     { label: "Gallery", path: "/admin/gallery", permission: "gallery.view", icon: GalleryHorizontal },
+    { label: "Notices", path: "/admin/notices", permission: "notices.view", icon: Megaphone },
     { label: "Programmes", path: "/admin/programmes", permission: "programmes.view" },
     { label: "Impact Stories", path: "/admin/impact-stories", permission: "impact_stories.view" },
     { label: "Blogs", path: "/admin/blogs", permission: "blogs.view" }
+  ] },
+  { label: "Careers", icon: BriefcaseBusiness, items: [
+    { label: "Job Posts", path: "/admin/careers", permission: "careers.view" },
+    { label: "Applications", path: "/admin/career-applications", permission: "career_applications.view" }
   ] },
   { label: "Communication", icon: MessageSquare, items: [{ label: "Contact Messages", path: "/admin/contact-messages", permission: "contact_messages.view" }] },
   { label: "Finance", icon: HandHeart, items: [
@@ -45,6 +51,7 @@ const menuGroups = [
 ];
 
 const emptyContent = { title: "", slug: "", shortDescription: "", description: "", featuredImage: "", image1: "", image2: "", image3: "", image4: "", status: "draft", featured: false };
+const emptyCareer = { title: "", slug: "", department: "", jobType: "Full-time", workMode: "On-site", location: "", openings: 1, summary: "", description: "", responsibilities: "", qualifications: "", skills: "", benefits: "", deadline: "", status: "draft", featured: false };
 
 function rowDate(row) {
   return row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "-";
@@ -90,6 +97,8 @@ function AdminDashboard({ path }) {
         else if (path === "/admin/page-sliders") setData(await api("/admin/page-sliders"));
         else if (path === "/admin/settings") setData(await api("/admin/settings"));
         else if (path === "/admin/payment-gateways") setData(await api("/admin/payment-gateways"));
+        else if (path === "/admin/careers") setData(await api("/admin/careers"));
+        else if (path === "/admin/career-applications") setData(await api("/admin/career-applications"));
         else setData(await api("/admin/dashboard"));
       } catch (err) {
         setError(err.message);
@@ -160,6 +169,8 @@ function renderPanel({ path, data, rows, can, meta, setModal, reload, user }) {
   if (path === "/admin/profile") return <ProfilePanel user={user} />;
   if (path === "/admin/my-donations") return <MyDonations rows={rows} reload={reload} />;
   if (path === "/admin/payment-gateways") return <PaymentGateways rows={rows} canEdit={can("settings.edit")} reload={reload} />;
+  if (path === "/admin/careers") return <CareerCrud rows={rows} can={can} setModal={setModal} reload={reload} />;
+  if (path === "/admin/career-applications") return <CareerApplications rows={rows} reload={reload} can={can} />;
   if (contentModules[path]) return <ContentCrud config={contentModules[path]} rows={rows} can={can} setModal={setModal} reload={reload} />;
   if (path === "/admin/users") return <UserCrud rows={rows} can={can} meta={meta} setModal={setModal} reload={reload} />;
   if (path === "/admin/roles") return <RoleCrud rows={rows} can={can} meta={meta} setModal={setModal} reload={reload} />;
@@ -279,6 +290,39 @@ function DonationTable({ title, rows }) {
   ]} />;
 }
 
+function CareerCrud({ rows, can, setModal, reload }) {
+  const del = async (row) => {
+    if (!confirm(`Delete ${row.title}?`)) return;
+    await api(`/admin/careers/${row.id}`, { method: "DELETE" });
+    reload();
+  };
+  return <DataTable title="Job Posts" rows={rows} toolbar={can("careers.create") && <button className="btn btn-primary table-add" onClick={() => setModal({ type: "career", mode: "create", row: emptyCareer })}><Plus size={16} />Add Job</button>} columns={[
+    { key: "title", label: "Title" },
+    { key: "department", label: "Department" },
+    { key: "location", label: "Location" },
+    { key: "jobType", label: "Type" },
+    { key: "status", label: "Status" },
+    { key: "deadline", label: "Deadline" },
+    { key: "actions", label: "Actions", render: (row) => <ActionButtons row={row} onView={(item) => setModal({ type: "career", mode: "view", row: item })} onEdit={(item) => setModal({ type: "career", mode: "edit", row: item })} onDelete={del} canEdit={can("careers.edit")} canDelete={can("careers.delete")} /> }
+  ]} />;
+}
+
+function CareerApplications({ rows, reload, can }) {
+  const updateStatus = async (row, status) => {
+    await api(`/admin/career-applications/${row.id}`, { method: "PATCH", body: { status } });
+    reload();
+  };
+  return <DataTable title="Career Applications" rows={rows} columns={[
+    { key: "applicantName", label: "Applicant" },
+    { key: "email", label: "Email" },
+    { key: "job", label: "Job", render: (row) => row.CareerPost?.title || "-" },
+    { key: "status", label: "Status" },
+    { key: "resume", label: "Resume", render: (row) => row.resumeUrl ? <a className="table-action" href={row.resumeUrl} target="_blank" rel="noreferrer">Open</a> : "-" },
+    { key: "createdAt", label: "Applied", render: rowDate },
+    { key: "actions", label: "Actions", render: (row) => can("career_applications.edit") ? <select value={row.status} onChange={(event) => updateStatus(row, event.target.value)}><option>new</option><option>reviewing</option><option>shortlisted</option><option>interview</option><option>selected</option><option>rejected</option><option>hold</option></select> : "-" }
+  ]} />;
+}
+
 function CrudModal(props) {
   return props.modal.type === "content" ? <ContentEditor {...props} /> : <RecordModal {...props} />;
 }
@@ -311,6 +355,10 @@ function RecordModal({ modal, meta, close, done }) {
         const method = modal.mode === "edit" ? "PUT" : "POST";
         const url = modal.mode === "edit" ? `/admin/permissions/${form.id}` : "/admin/permissions";
         await api(url, { method, body: form });
+      } else if (modal.type === "career") {
+        const method = modal.mode === "edit" ? "PUT" : "POST";
+        const url = modal.mode === "edit" ? `/admin/careers/${form.id}` : "/admin/careers";
+        await api(url, { method, body: form });
       }
       done();
     } catch (error) {
@@ -325,11 +373,21 @@ function RecordModal({ modal, meta, close, done }) {
         {modal.type === "user" && <UserForm form={form} update={update} meta={meta} readOnly={readOnly} />}
         {modal.type === "role" && <RoleForm form={form} update={update} meta={meta} readOnly={readOnly} />}
         {modal.type === "permission" && <PermissionForm form={form} update={update} readOnly={readOnly} />}
+        {modal.type === "career" && <CareerForm form={form} update={update} readOnly={readOnly} />}
         {message && <p className="form-message error">{message}</p>}
         <div className="crud-actions"><button type="button" onClick={close}>Cancel</button><button className="btn btn-primary" type="submit" disabled={saving}>{saving ? "Saving..." : readOnly ? "Close" : "Save"}</button></div>
       </form>
     </div>
   );
+}
+
+function CareerForm({ form, update, readOnly }) {
+  return <div className="crud-grid">
+    {["title", "slug", "department", "jobType", "workMode", "location", "experienceLevel", "openings", "salaryMin", "salaryMax", "currency", "deadline", "applicationEmail", "applyUrl"].map((key) => <label key={key}><span>{key}</span><input disabled={readOnly} type={["openings", "salaryMin", "salaryMax"].includes(key) ? "number" : key === "deadline" ? "date" : "text"} value={form[key] || ""} onChange={(event) => update(key, event.target.value)} /></label>)}
+    <label><span>Status</span><select disabled={readOnly} value={form.status || "draft"} onChange={(event) => update("status", event.target.value)}><option>draft</option><option>published</option><option>closed</option></select></label>
+    <label><span>Featured</span><select disabled={readOnly} value={form.featured ? "true" : "false"} onChange={(event) => update("featured", event.target.value === "true")}><option value="false">No</option><option value="true">Yes</option></select></label>
+    {["summary", "description", "responsibilities", "qualifications", "skills", "benefits"].map((key) => <label className="wide" key={key}><span>{key}</span><textarea disabled={readOnly} rows="4" value={form[key] || ""} onChange={(event) => update(key, event.target.value)} /></label>)}
+  </div>;
 }
 
 function UserForm({ form, update, meta, readOnly }) {

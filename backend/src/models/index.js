@@ -66,7 +66,7 @@ export const Setting = sequelize.define("Setting", {
 }, { ...common, indexes: [{ unique: true, fields: ["group", "key"] }] });
 
 export const Content = sequelize.define("Content", {
-  module: { type: DataTypes.ENUM("gallery", "programmes", "impact_stories", "blogs"), allowNull: false },
+  module: { type: DataTypes.ENUM("gallery", "programmes", "impact_stories", "blogs", "notices"), allowNull: false },
   title: { type: DataTypes.STRING, allowNull: false },
   slug: { type: DataTypes.STRING, allowNull: false },
   shortDescription: DataTypes.TEXT,
@@ -150,6 +150,50 @@ export const Donation = sequelize.define("Donation", {
   metadata: jsonColumn("metadata")
 }, { ...common, defaultScope: { attributes: { exclude: ["gatewayCredentials"] } } });
 
+export const CareerPost = sequelize.define("CareerPost", {
+  title: { type: DataTypes.STRING, allowNull: false },
+  slug: { type: DataTypes.STRING, allowNull: false, unique: true },
+  department: DataTypes.STRING,
+  jobType: { type: DataTypes.STRING, defaultValue: "Full-time" },
+  workMode: { type: DataTypes.STRING, defaultValue: "On-site" },
+  location: DataTypes.STRING,
+  salaryMin: DataTypes.DECIMAL(12, 2),
+  salaryMax: DataTypes.DECIMAL(12, 2),
+  currency: { type: DataTypes.STRING(3), defaultValue: "INR" },
+  experienceLevel: DataTypes.STRING,
+  openings: { type: DataTypes.INTEGER, defaultValue: 1 },
+  summary: DataTypes.TEXT,
+  description: DataTypes.TEXT("long"),
+  responsibilities: DataTypes.TEXT("long"),
+  qualifications: DataTypes.TEXT("long"),
+  skills: DataTypes.TEXT,
+  benefits: DataTypes.TEXT,
+  applicationEmail: DataTypes.STRING,
+  applyUrl: DataTypes.STRING,
+  deadline: DataTypes.DATEONLY,
+  status: { type: DataTypes.ENUM("draft", "published", "closed"), defaultValue: "draft" },
+  featured: { type: DataTypes.BOOLEAN, defaultValue: false },
+  publishedAt: DataTypes.DATE
+}, common);
+
+export const CareerApplication = sequelize.define("CareerApplication", {
+  applicantName: { type: DataTypes.STRING, allowNull: false },
+  email: { type: DataTypes.STRING, allowNull: false },
+  phone: DataTypes.STRING,
+  currentLocation: DataTypes.STRING,
+  experienceYears: DataTypes.DECIMAL(4, 1),
+  currentCompany: DataTypes.STRING,
+  currentCtc: DataTypes.STRING,
+  expectedCtc: DataTypes.STRING,
+  noticePeriod: DataTypes.STRING,
+  coverLetter: DataTypes.TEXT,
+  resumeUrl: { type: DataTypes.STRING, allowNull: false },
+  portfolioUrl: DataTypes.STRING,
+  linkedinUrl: DataTypes.STRING,
+  status: { type: DataTypes.ENUM("new", "reviewing", "shortlisted", "interview", "selected", "rejected", "hold"), defaultValue: "new" },
+  adminNote: DataTypes.TEXT
+}, common);
+
 export const AuditLog = sequelize.define("AuditLog", {
   action: { type: DataTypes.STRING, allowNull: false },
   module: { type: DataTypes.STRING, allowNull: false },
@@ -168,6 +212,10 @@ User.belongsToMany(Permission, { through: UserPermission });
 Permission.belongsToMany(User, { through: UserPermission });
 User.hasMany(Donation);
 Donation.belongsTo(User);
+User.hasMany(CareerPost, { foreignKey: "createdBy" });
+CareerPost.belongsTo(User, { as: "creator", foreignKey: "createdBy" });
+CareerPost.hasMany(CareerApplication, { foreignKey: "careerPostId" });
+CareerApplication.belongsTo(CareerPost, { foreignKey: "careerPostId" });
 User.hasMany(Content, { foreignKey: "createdBy" });
 Content.belongsTo(User, { as: "author", foreignKey: "createdBy" });
 BlogCategory.hasMany(Content, { foreignKey: "categoryId" });
@@ -175,4 +223,4 @@ Content.belongsTo(BlogCategory, { as: "blogCategory", foreignKey: "categoryId" }
 User.hasMany(AuditLog);
 AuditLog.belongsTo(User);
 
-export const models = { User, Role, Permission, RolePermission, UserPermission, Setting, Content, BlogCategory, ContactMessage, Donation, PaymentGateway, AuditLog };
+export const models = { User, Role, Permission, RolePermission, UserPermission, Setting, Content, BlogCategory, ContactMessage, Donation, PaymentGateway, CareerPost, CareerApplication, AuditLog };

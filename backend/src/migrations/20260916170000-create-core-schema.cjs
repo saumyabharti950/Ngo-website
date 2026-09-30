@@ -1,6 +1,6 @@
 "use strict";
 
-const contentModules = ["gallery", "programmes", "impact_stories", "blogs"];
+const contentModules = ["gallery", "programmes", "impact_stories", "blogs", "notices"];
 
 module.exports = {
   async up(queryInterface, Sequelize) {

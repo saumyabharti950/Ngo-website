@@ -19,7 +19,7 @@ function loadCheckout(provider) {
   return scripts.get(provider);
 }
 
-function DonationPage() {
+function DonationPage({ modal = false, onClose }) {
   const [citizen, setCitizen] = useState("indian");
   const frequency = "one-time";
   const [enteredAmount, setAmount] = useState(null);
@@ -96,10 +96,10 @@ function DonationPage() {
     } catch (error) { setMessage(error.message); setBusy(false); }
   };
 
-  return (
-    <section className="donation-page">
+  const content = (
       <div className="donation-shell">
         <div className="donation-card">
+          {modal && <button type="button" className="donation-modal-close" onClick={onClose} aria-label="Close donation form">x</button>}
           <div className="citizen-tabs" role="tablist" aria-label="Citizenship">
             <button className={citizen === "indian" ? "active" : ""} onClick={() => setCitizen("indian")} role="tab" aria-selected={citizen === "indian"}>
               {citizen === "indian" ? <CheckCircle2 /> : <Circle />} Indian Citizens
@@ -150,8 +150,9 @@ function DonationPage() {
           <a className="donor-login" href={user ? "/admin" : "/login"}><UserRound fill="currentColor" /> {user ? "My Dashboard" : "Donor Login"}</a>
         </div>
       </div>
-    </section>
   );
+  if (modal) return <div className="donation-modal-overlay" role="dialog" aria-modal="true">{content}</div>;
+  return <section className="donation-page">{content}</section>;
 }
 
 export default DonationPage;

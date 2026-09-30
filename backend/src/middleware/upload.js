@@ -5,12 +5,12 @@ import { v4 as uuid } from "uuid";
 import { ApiError } from "../utils/response.js";
 
 const uploadRoot = process.env.UPLOAD_DIR || "uploads";
-const allowedMime = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"]);
+const allowedMime = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "video/mp4", "video/webm", "video/ogg"]);
 
 const storage = multer.diskStorage({
   destination(req, _file, callback) {
     const scope = req.params.scope || "general";
-    if (!["gallery", "programmes", "impact_stories", "blogs", "settings", "banners", "general"].includes(scope)) return callback(new ApiError(422, "Invalid upload category"));
+    if (!["gallery", "programmes", "impact_stories", "blogs", "notices", "settings", "banners", "resumes", "videos", "general"].includes(scope)) return callback(new ApiError(422, "Invalid upload category"));
     const directory = path.join(uploadRoot, scope);
     fs.mkdirSync(directory, { recursive: true });
     callback(null, directory);

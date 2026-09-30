@@ -4,7 +4,7 @@ import { asyncHandler, ok, ApiError } from "../utils/response.js";
 import { makeSlug } from "../utils/slug.js";
 import { contentPayload } from "../utils/contentPayload.js";
 
-const modules = new Set(["gallery", "programmes", "impact_stories", "blogs"]);
+const modules = new Set(["gallery", "programmes", "impact_stories", "blogs", "notices"]);
 
 const moduleFromReq = (req) => {
   const module = req.params.module;

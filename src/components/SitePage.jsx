@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 import ContentCollection, { collectionThemes } from "./ContentCollection";
 import Campaigns from "./Campaigns";
+import CareerPage from "./CareerPage";
+import GalleryView from "./GalleryView";
 
 /* =========================================================================
    CONTENT
@@ -183,6 +185,7 @@ function DynamicContentPage({ module, fallbackPage, previewContent }) {
   const items = previewContent ? [previewContent, ...state.items.filter((item) => item.id !== previewContent.id)] : state.items;
   const loading = previewContent ? false : state.loading;
   const error = previewContent ? "" : state.error;
+  if (module === "gallery") return <GalleryView items={items} loading={loading} error={error} />;
   if (collectionThemes[module]) return <ContentCollection key={module} module={module} items={items} loading={loading} error={error} />;
   return (
     <section className="site-page">
@@ -1202,6 +1205,12 @@ function SitePage({ path, previewContent }) {
     content = <DynamicDetailPage key={path} module="blogs" slug={slug} />;
   } else if (path === "/contact" || path === "/reach") {
     content = <ContactPage />;
+  } else if (path === "/careers") {
+    content = <CareerPage />;
+  } else if (path === "/gallery") {
+    content = <DynamicContentPage previewContent={previewContent} module="gallery" fallbackPage={{ eyebrow: "Gallery", title: "Community moments", text: "" }} />;
+  } else if (path === "/notices") {
+    content = <DynamicContentPage previewContent={previewContent} module="notices" fallbackPage={{ eyebrow: "Notices", title: "Latest notices and updates", text: "Stay updated with announcements, links and media shared by the SIFI Foundation team." }} />;
   } else if (path === "/blog") {
     content = <DynamicContentPage previewContent={previewContent} module="blogs" fallbackPage={newPages["/blog"]} />;
   } else if (path === "/campaigns") {
