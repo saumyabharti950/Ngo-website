@@ -141,7 +141,7 @@ export default function ContentSections() {
 
       <section className="journey-section">
         <div className="home-shell">
-          <Heading label="OUR JOURNEY" title="Our Journey: From 2025 to 2026 & Beyond" text="Small steps, field learning and community partnerships continue to shape the road ahead." />
+          <Heading label="OUR JOURNEY" title="Our Journey: From 2011 to 2026 & Beyond" text="Small steps, field learning and community partnerships continue to shape the road ahead." />
           <div className="journey-line">
             {journey.map(([title, text], index) => (
               <article className={`journey-card home-reveal ${index % 2 ? "right reveal-right" : "left reveal-left"}`} style={{ "--d": `${index * 180}ms` }} key={title}>

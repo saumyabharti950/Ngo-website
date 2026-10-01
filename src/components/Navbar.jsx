@@ -15,7 +15,7 @@ const navigation = [
 
   { href: "/careers", label: "Career" },
 
-  { href: "/careers", label: "Careers" },
+
 
   { href: "/get-involved", label: "Get Involved" },
   { href: "/blog", label: "Blog" },

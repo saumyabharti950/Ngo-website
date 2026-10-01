@@ -1,10 +1,10 @@
 import { Building2, HeartHandshake, IndianRupee, UsersRound } from "lucide-react";
 
 const stats = [
-  [IndianRupee, "5 Cr+", "Funds mobilised"],
-  [HeartHandshake, "1 Cr+", "Meals & support"],
-  [UsersRound, "500,000+", "People reached"],
-  [Building2, "1000+", "Communities touched"],
+  [IndianRupee, "3 Cr+", "Funds mobilised"],
+  [HeartHandshake, "50 L+", "Meals & support"],
+  [UsersRound, "50,000+", "People reached"],
+  [Building2, "500+", "Communities touched"],
 ];
 
 export default function Stats() {

@@ -127,7 +127,7 @@ function Footer() {
       .footer-grid > section:nth-child(6){ animation-delay:.4s; }
       .footer-brand{ min-width:0; }
       .footer-logo.brand-logo{
-        width:150px;
+        width:60px;
         height:auto;
         min-height:54px;
         display:flex;

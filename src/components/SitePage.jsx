@@ -12,45 +12,246 @@ import GalleryView from "./GalleryView";
    CONTENT
    ========================================================================= */
 
+
 const pages = {
   "/about-us": {
-    label: "ABOUT SIFI FOUNDATION", title: "Building Pathways to Inclusive and Sustainable Development",
-    text: "Social Initiative for India Foundation (SIFI Foundation) is a Section 8 not-for-profit organisation committed to advancing inclusive, sustainable and community-led development.\n\nThe Foundation brings together field-level implementation, professional programme management, research, partnerships and community participation to address development challenges and create lasting opportunities for underserved and vulnerable communities.\n\nOur work spans healthcare and public health, education and digital learning, skill development, livelihoods, women and youth empowerment, agriculture, environmental sustainability, water and sanitation, community development, research and social impact assessment.\n\nWe believe that sustainable development begins with understanding communities, listening to their needs and working with them to create practical and measurable solutions.",
-    cards: [["Our vision", "An inclusive and sustainable India where every person can live with dignity, knowledge, health, livelihood security and equal opportunity."], ["Our mission", "To improve quality of life through participatory programmes in healthcare, education, skills, livelihoods, technology and essential services."], ["Our values", "Dignity, inclusion, integrity, participation, sustainability, accountability and innovation guide our work."], ["How we work", "We listen to communities, understand local priorities, build partnerships and use evidence to design programmes that can create lasting value."]],
+    label: "ABOUT SIFI FOUNDATION",
+    title: "Building Pathways to Inclusive and Sustainable Development",
+    text: `Social Initiative for India Foundation (SIFI Foundation) is a Section 8 not-for-profit organisation committed to advancing inclusive, sustainable and community-led development.
+The Foundation brings together field-level implementation, professional programme management, research, partnerships and community participation to address development challenges and create lasting opportunities for underserved and vulnerable communities.
+Our work spans healthcare and public health, education and digital learning, skill development, livelihoods, women and youth empowerment, agriculture, environmental sustainability, water and sanitation, community development, research and social impact assessment.
+`,
+    cards: [
+      [
+        "Our vision",
+        "An inclusive and sustainable India where every person can live with dignity and have access to knowledge, health, livelihood opportunities and equal participation."
+      ],
+      [
+        "Our mission",
+        "To improve quality of life through participatory programmes in healthcare, education, skills, livelihoods, technology and essential community services."
+      ],
+      [
+        "Our values",
+        "Dignity, inclusion, integrity, participation, sustainability, accountability and innovation guide the way we work."
+      ],
+      [
+        "How we work",
+        "We listen to communities, understand local priorities, build meaningful partnerships and use evidence to design programmes that create lasting value."
+      ]
+    ]
   },
+
   "/volunteer": {
-    label: "VOLUNTEER WITH US", title: "Give your time. Strengthen communities.",
-    text: "Your time, skills and perspective can help create better opportunities for children, women, youth and communities.",
-    cards: [["Share your expertise", "Support programme design, communications, research, technology, training, finance or community development with your professional knowledge."], ["Join field action", "Participate in education activities, awareness drives, surveys, outreach and community engagement with care and respect."], ["Mentor young people", "Help youth build confidence through career conversations, digital learning, practical skills and exposure to new opportunities."], ["Volunteer responsibly", "Respect community dignity, protect privacy, follow safeguarding practices and work in partnership with our team."]],
+    label: "VOLUNTEER WITH US",
+    title: "Give your time. Strengthen communities.",
+    text: "Your time, skills and perspective can help create better opportunities for children, women, young people and communities. Join us in turning knowledge, compassion and action into meaningful community impact.",
+    cards: [
+      [
+        "Share your expertise",
+        "Support programme design, communications, research, technology, training, finance or community development by contributing your professional knowledge."
+      ],
+      [
+        "Join field action",
+        "Participate in education activities, awareness campaigns, surveys, outreach programmes and community engagement with care, respect and responsibility."
+      ],
+      [
+        "Mentor young people",
+        "Help young people build confidence through career conversations, digital learning, practical skills, mentoring and exposure to new opportunities."
+      ],
+      [
+        "Volunteer responsibly",
+        "Respect community dignity, protect personal information, follow safeguarding practices and work collaboratively with our team and community partners."
+      ]
+    ]
   },
+
   "/campaigns": {
-    label: "CAMPAIGNS", title: "Action designed around community needs",
-    text: "Our campaigns turn shared concern into practical action by bringing communities, volunteers, institutions and responsible partners together.",
-    cards: [["Education for every learner", "Promoting foundational learning, digital access, study support and safe spaces where children can grow."], ["Women empowered, communities stronger", "Creating awareness and pathways in health, leadership, financial literacy, skills and livelihoods."], ["Youth ready for the future", "Connecting young people with employability skills, technology, mentoring and enterprise opportunities."], ["From awareness to action", "We listen, plan with stakeholders, implement responsibly, monitor progress and improve through learning."]],
+    label: "CAMPAIGNS",
+    title: "Turning community needs into meaningful action",
+    text: "Our campaigns bring communities, volunteers, institutions and responsible partners together to address important social challenges and create practical opportunities for positive change.",
+    cards: [
+      [
+        "Education for every learner",
+        "Promoting foundational learning, digital access, study support and safe learning environments where children and young people can grow with confidence."
+      ],
+      [
+        "Women empowered, communities stronger",
+        "Creating pathways for awareness, health, leadership, financial literacy, skills development and sustainable livelihoods."
+      ],
+      [
+        "Youth ready for the future",
+        "Connecting young people with employability skills, digital capabilities, mentoring, career guidance and enterprise opportunities."
+      ],
+      [
+        "From awareness to action",
+        "We listen, understand local priorities, plan with stakeholders, implement responsibly, monitor progress and continuously improve through learning."
+      ]
+    ]
   },
+
   "/credentials": {
-    label: "CREDENTIALS", title: "Responsible. Transparent. Accountable.",
-    text: "As a Section 8 not-for-profit organisation, SIFI Foundation is committed to responsible governance, ethical practice and transparent programme management.",
-    cards: [["Governance", "Clear leadership, defined responsibilities, documentation and responsible oversight support every programme and partnership."], ["Transparency", "We aim to communicate our work clearly through programme updates, research, monitoring, documentation and reporting."], ["Responsible resources", "We value careful planning, appropriate use of resources and accountability to communities, partners and supporters."], ["Policies & safeguarding", "Privacy, child protection, volunteer conduct, donations and ethical engagement guide our interactions and decisions."]],
+    label: "CREDENTIALS",
+    title: "Responsible. Transparent. Accountable.",
+    text: "As a Section 8 not-for-profit organisation, SIFI Foundation is committed to responsible governance, ethical practices, transparent programme management and accountable use of resources.",
+    cards: [
+      [
+        "Governance",
+        "Clear leadership, defined responsibilities, appropriate documentation and responsible oversight support our programmes and partnerships."
+      ],
+      [
+        "Transparency",
+        "We aim to communicate our work clearly through programme updates, research, monitoring, documentation and appropriate reporting."
+      ],
+      [
+        "Responsible use of resources",
+        "We believe in careful planning, efficient resource management and accountability towards communities, partners, supporters and stakeholders."
+      ],
+      [
+        "Policies & safeguarding",
+        "Privacy, child protection, volunteer conduct, ethical engagement and responsible programme practices guide our interactions and decisions."
+      ]
+    ]
   },
+
   "/reach": {
-    label: "REACH OUT", title: "Let's work together",
-    text: "We welcome conversations with communities, corporate partners, government institutions, development agencies, researchers, volunteers and supporters.",
-    cards: [["Visit us", "C/22, Patel Park, Harmu Housing Colony, Ranchi - 834002, Jharkhand, India."], ["Email us", "For general enquiries: info@sififoundation.org\nFor programmes and partnerships: projects@sififoundation.org"], ["Call us", "0651-3591618\nOur team will be glad to understand your interest and guide you to the right conversation."], ["Start a partnership", "Tell us about your organisation, community priorities or area of interest. Together, we can explore a practical and responsible way to contribute."]],
+    label: "REACH OUT",
+    title: "Let's work together",
+    text: "We welcome conversations with communities, corporate partners, government institutions, development agencies, researchers, volunteers and supporters who share our commitment to inclusive and sustainable development.",
+    cards: [
+      [
+        "Visit us",
+        "C/22, Patel Park, Harmu Housing Colony, Ranchi - 834002, Jharkhand, India."
+      ],
+      [
+        "Email us",
+        "For general enquiries: info@sififoundation.org\nFor programmes and partnerships: projects@sififoundation.org"
+      ],
+      [
+        "Call us",
+        "0651-3591618\nOur team will be happy to understand your enquiry and connect you with the appropriate team."
+      ],
+      [
+        "Start a partnership",
+        "Tell us about your organisation, community priorities or area of interest. Together, we can explore a practical, responsible and meaningful way to collaborate."
+      ]
+    ]
   },
+
   "/donate": {
-    label: "DONATE", title: "Support change that lasts",
-    text: "Your contribution can help children learn, women build independence, young people gain skills and communities access essential opportunities.",
-    cards: [["Support education", "Help provide learning support, digital access, study materials and safe opportunities for children and young people."], ["Empower women", "Contribute to awareness, skills, leadership and livelihood pathways that strengthen women and families."], ["Upskill the youth", "Support vocational training, digital learning, mentoring and employment-oriented opportunities for young people."], ["Accountable impact", "We believe every contribution should support responsible planning, implementation, monitoring and transparent communication."], ["Connect with us", "Contact our team before contributing so we can share the appropriate information and discuss partnership support."]],
-  },
+    label: "DONATE",
+    title: "Support opportunities that create lasting change",
+    text: "Your support can contribute to education, healthcare, skills, livelihoods and community development initiatives that help people build greater opportunities and resilience.",
+    cards: [
+      [
+        "Support education",
+        "Help expand learning support, digital access, study resources and safe educational opportunities for children and young people."
+      ],
+      [
+        "Empower women",
+        "Support awareness, skills development, leadership, financial literacy and livelihood pathways that can strengthen women and families."
+      ],
+      [
+        "Upskill the youth",
+        "Contribute to vocational training, digital learning, mentoring, career development and employment-oriented opportunities for young people."
+      ],
+      [
+        "Support accountable impact",
+        "We believe contributions should be supported by responsible planning, implementation, monitoring and transparent communication."
+      ],
+      [
+        "Connect with us",
+        "Please contact our team before contributing so we can provide the appropriate information and discuss available opportunities for support."
+      ]
+    ]
+  }
 };
 
 const newPages = {
-  "/take-action": { eyebrow: "TAKE ACTION", title: "Small actions can open big possibilities.", text: "Choose a meaningful way to stand alongside communities and turn care into practical, lasting change.", image: "Takeaction.png", cards: [["Give", "Support learning, health, skills and livelihoods through a contribution."], ["Volunteer", "Offer your time, expertise or voice where it can make a difference."], ["Partner", "Build a responsible programme with our community and institutional teams."]] },
-  "/get-involved": { eyebrow: "GET INVOLVED", title: "Bring your purpose to the movement.", text: "Whether you are an individual, a team or an institution, there is a thoughtful place to begin.", image: "Getinvolbed.png", cards: [["Individuals", "Share skills, mentor young people or amplify community stories."], ["Organisations", "Design high-value CSR and development partnerships with us."], ["Communities", "Help identify priorities and shape local solutions together."]] },
-  "/careers": { eyebrow: "CAREERS", title: "Build a career that creates real impact.", text: "We are looking for people who care deeply about communities, are ready to learn, and want to work with integrity to create lasting change.", image: "Takeaction.png", cards: [["Programme roles", "Work closely with communities on education, livelihoods, health, and development initiatives."], ["Operations & support", "Help design systems, strengthen processes, and keep programmes accountable and well-run."], ["Field and outreach", "Support implementation, partnerships, volunteering, and community engagement across locations."]] },
-  "/blog": { eyebrow: "FIELD NOTES", title: "Ideas from the ground, made for change.", text: "Stories, learning and reflections from people working to make opportunity more inclusive.", image: "Blog.png", cards: [["Learning with dignity", "Why access to consistent, joyful learning changes more than classrooms."], ["The power of local voices", "Community insight is not an input—it is the starting point."], ["Measuring meaningful progress", "Looking beyond numbers to understand durable outcomes."]] },
+  "/take-action": {
+    eyebrow: "TAKE ACTION",
+    title: "Small actions can open big possibilities.",
+    text: "There are many ways to stand alongside communities. Choose an action that matches your time, skills or resources and help turn shared concern into practical, lasting change.",
+    image: "Takeaction.png",
+    cards: [
+      [
+        "Give",
+        "Support initiatives in education, healthcare, skills, livelihoods and community development through a meaningful contribution."
+      ],
+      [
+        "Volunteer",
+        "Share your time, knowledge, professional expertise or voice to support programmes and community initiatives."
+      ],
+      [
+        "Partner",
+        "Work with our team to develop responsible programmes that respond to community priorities and create measurable social value."
+      ]
+    ]
+  },
+
+  "/get-involved": {
+    eyebrow: "GET INVOLVED",
+    title: "Bring your purpose to the movement.",
+    text: "Whether you are an individual, a professional team, an organisation or a community, there is a meaningful way to get involved and contribute to positive change.",
+    image: "Getinvolbed.png",
+    cards: [
+      [
+        "Individuals",
+        "Share your skills, mentor young people, volunteer your time or help amplify important community initiatives."
+      ],
+      [
+        "Organisations",
+        "Explore responsible CSR, development and community partnerships aligned with shared goals and measurable impact."
+      ],
+      [
+        "Communities",
+        "Share local knowledge, identify priorities and participate in shaping practical solutions that respond to real community needs."
+      ]
+    ]
+  },
+
+  "/careers": {
+    eyebrow: "CAREERS",
+    title: "Build a career that creates real impact.",
+    text: "We welcome people who care about communities, are willing to learn, work collaboratively and want to contribute with integrity to meaningful social development.",
+    image: "Takeaction.png",
+    cards: [
+      [
+        "Programme roles",
+        "Work with communities and partners on initiatives across education, livelihoods, healthcare, skills and social development."
+      ],
+      [
+        "Operations & support",
+        "Strengthen systems, processes, documentation, finance, technology and programme support to help our work remain effective and accountable."
+      ],
+      [
+        "Field & outreach",
+        "Support programme implementation, community engagement, partnerships, volunteering and outreach activities across locations."
+      ]
+    ]
+  },
+
+  "/blog": {
+    eyebrow: "FIELD NOTES",
+    title: "Ideas from the ground, made for change.",
+    text: "Explore stories, insights, learning and reflections from people and communities working to make opportunity more inclusive and sustainable.",
+    image: "Blog.png",
+    cards: [
+      [
+        "Learning with dignity",
+        "Exploring why consistent, inclusive and joyful learning can create opportunities that extend far beyond the classroom."
+      ],
+      [
+        "The power of local voices",
+        "Community knowledge is more than an input. It is an important starting point for understanding challenges and shaping relevant solutions."
+      ],
+      [
+        "Measuring meaningful progress",
+        "Looking beyond numbers to understand outcomes, learning, community participation and the changes that matter over time."
+      ]
+    ]
+  }
 };
+
 
 /* =========================================================================
    SHARED THEME — one warm, editorial identity used across every page
@@ -615,8 +816,23 @@ function AboutPage({ page }) {
     event.currentTarget.style.setProperty("--py", `${event.clientY - r.top}px`);
   };
 
-  const paragraphs = page.text.split("\n\n");
-  const statementWords = paragraphs[1].split(" ");
+  /*
+   * The supplied About content uses single line breaks (\n), while the
+   * original renderer expected double line breaks (\n\n). Splitting only
+   * on \n\n could make paragraphs[1..3] undefined and crash the page.
+   * The content itself is unchanged; only its rendering is normalized.
+   */
+  const paragraphs = String(page?.text || "")
+    .split(/\n+/)
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const leadText = paragraphs[0] || "";
+  const whoWeAreText = paragraphs[1] || leadText;
+  const workText = paragraphs[2] || whoWeAreText;
+  const beliefText = paragraphs[3] || workText;
+
+  const statementWords = whoWeAreText.split(/\s+/).filter(Boolean);
 
   return (
     <section ref={rootRef} className="sifi-about">
@@ -657,7 +873,7 @@ function AboutPage({ page }) {
         </h1>
 
         <div className="sa-hero-row">
-          <p className="sa-lead">{paragraphs[0]}</p>
+          <p className="sa-lead">{leadText}</p>
           <div className="sa-actions">
             <a className="sa-btn sa-btn--solid" href="/donate"><span>Support our work</span></a>
             <a className="sa-btn sa-btn--ghost" href="/reach"><span>Get in touch</span></a>
@@ -688,7 +904,7 @@ function AboutPage({ page }) {
           <div className="sa-reveal">
             <Kicker no={ROMAN[0]}>Who we are</Kicker>
           </div>
-          <p className="sa-statement" aria-label={paragraphs[1]}>
+          <p className="sa-statement" aria-label={whoWeAreText}>
             {statementWords.map((w, i) => (
               <span key={`${w}-${i}`}>
                 <span className="sa-w" aria-hidden="true">{w}</span>{" "}
@@ -716,7 +932,7 @@ function AboutPage({ page }) {
           <div className="sa-work-copy sa-reveal" style={{ "--d": ".2s" }}>
             <Kicker no={ROMAN[1]}>Our work</Kicker>
             <h2>Working with communities to create lasting opportunity</h2>
-            <p>{paragraphs[2]}</p>
+            <p>{workText}</p>
             <div className="sa-work-principles" aria-label="Our working principles">
               <span>Listen</span><i aria-hidden="true" />
               <span>Co-create</span><i aria-hidden="true" />
@@ -748,7 +964,7 @@ function AboutPage({ page }) {
           <div className="sa-band-copy sa-reveal">
             <Kicker no={ROMAN[2]}>Our belief</Kicker>
             <h2>Practical action, measurable solutions</h2>
-            <blockquote className="sa-quote">{paragraphs[3]}</blockquote>
+            <blockquote className="sa-quote">{beliefText}</blockquote>
           </div>
         </div>
       </div>
