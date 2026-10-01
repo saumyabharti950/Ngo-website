@@ -17,7 +17,8 @@ const pages = {
   "/about-us": {
     label: "ABOUT SIFI FOUNDATION",
     title: "Building Pathways to Inclusive and Sustainable Development",
-    text: `Social Initiative for India Foundation (SIFI Foundation) is a Section 8 not-for-profit organisation committed to advancing inclusive, sustainable and community-led development.
+    text: `Social Initiative for India Foundation (SIFI Foundation) is a Section 8 not-for-profit organisation committed to advancing inclusive, sustainable and community-led development. The Foundation brings together field-level implementation, professional programme management, research, partnerships and community participation to address development challenges and create lasting opportunities for underserved and vulnerable communities.Our work spans healthcare and public health, education and digital learning, skill development, livelihoods, women and youth empowerment, agriculture, environmental sustainability, water and sanitation, community development, research and social impact assessment.
+
 The Foundation brings together field-level implementation, professional programme management, research, partnerships and community participation to address development challenges and create lasting opportunities for underserved and vulnerable communities.
 Our work spans healthcare and public health, education and digital learning, skill development, livelihoods, women and youth empowerment, agriculture, environmental sustainability, water and sanitation, community development, research and social impact assessment.
 We believe that sustainable development begins with understanding communities, listening to their needs and working with them to create practical and measurable solutions.
@@ -1127,6 +1128,7 @@ function AboutPage({ page }) {
         .sifi-about *{ box-sizing:border-box; }
         .sifi-about h1,.sifi-about h2,.sifi-about h3{ font-family:"Fraunces", serif; font-weight:500; letter-spacing:-0.015em; margin:0; color:var(--sa-cream); }
         .sifi-about p{ margin:0; }
+        .sifi-about p:not(.sa-kicker){ text-align:justify; text-align-last:left; }
         .sifi-about ::selection{ background:var(--sa-brass); color:#1A120A; }
         .sa-sec{ position:relative; z-index:2; max-width:1240px; margin:0 auto; padding:0 40px; }
 

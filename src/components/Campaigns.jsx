@@ -82,7 +82,7 @@ export default function Campaigns({ fullPage = false }) {
         .bsf-campaigns-page .bsf-campaign-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); }
         .bsf-campaign-card{ overflow:hidden; border-radius:8px; border:1px solid rgba(255,255,255,.74); background:rgba(255,255,255,.9); box-shadow:0 18px 42px rgba(16,28,58,.1); opacity:0; transform:translateY(34px) rotateX(5deg); animation:bsfCampaignIn .9s cubic-bezier(.19,1,.22,1) var(--d,0s) forwards; transition:transform .28s ease, box-shadow .28s ease; backdrop-filter:blur(10px); }
         .bsf-campaign-card:hover{ transform:translateY(-5px); box-shadow:0 22px 42px rgba(16,28,58,.14); }
-        .bsf-campaign-media{ position:relative; height:170px; overflow:hidden; background:#fff; }
+        .bsf-campaign-media{ position:relative; height:224px; overflow:hidden; background:#fff; }
         .bsf-campaign-media img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .55s ease; }
         .bsf-campaign-media img.bsf-campaign-image-contain{ object-fit:contain; background:#fff; }
         .bsf-campaign-card:hover img{ transform:scale(1.06); }
