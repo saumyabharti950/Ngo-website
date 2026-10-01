@@ -20,6 +20,9 @@ const pages = {
     text: `Social Initiative for India Foundation (SIFI Foundation) is a Section 8 not-for-profit organisation committed to advancing inclusive, sustainable and community-led development.
 The Foundation brings together field-level implementation, professional programme management, research, partnerships and community participation to address development challenges and create lasting opportunities for underserved and vulnerable communities.
 Our work spans healthcare and public health, education and digital learning, skill development, livelihoods, women and youth empowerment, agriculture, environmental sustainability, water and sanitation, community development, research and social impact assessment.
+We believe that sustainable development begins with understanding communities, listening to their needs and working with them to create practical and measurable solutions.
+Our approach is simple:
+Understand → Plan → Partner → Implement → Measure → Learn → Scale
 `,
     cards: [
       [
@@ -827,6 +830,8 @@ function AboutPage({ page }) {
     .map((value) => value.trim())
     .filter(Boolean);
 
+  const leadParagraphs = paragraphs.slice(0, 5);
+  const approachLine = paragraphs[5] || "";
   const leadText = paragraphs[0] || "";
   const whoWeAreText = paragraphs[1] || leadText;
   const workText = paragraphs[2] || whoWeAreText;
@@ -873,7 +878,12 @@ function AboutPage({ page }) {
         </h1>
 
         <div className="sa-hero-row">
-          <p className="sa-lead">{leadText}</p>
+          <div className="sa-lead">
+            {leadParagraphs.map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
+            {approachLine ? <p className="sa-approach-line">{approachLine}</p> : null}
+          </div>
           <div className="sa-actions">
             <a className="sa-btn sa-btn--solid" href="/donate"><span>Support our work</span></a>
             <a className="sa-btn sa-btn--ghost" href="/reach"><span>Get in touch</span></a>
@@ -1191,16 +1201,19 @@ function AboutPage({ page }) {
           background:radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(0,0,0,.45)), linear-gradient(160deg,rgba(134,184,167,.16),transparent 50%,rgba(201,112,79,.18)); }
 
         /* ===== hero ===== */
-        .sa-hero{ padding-top:128px; padding-bottom:40px; }
+        .sa-hero{ padding-top:110px; padding-bottom:40px; }
         .sa-hero > .sa-kicker{ opacity:0; animation:saFade 1.2s ease 1s forwards; }
-        .sa-hero-title{ max-width:15em; font-size:clamp(2.5rem,6vw,5.1rem); line-height:1.05; font-weight:500; }
+        .sa-hero-title{ max-width:15em; font-size:clamp(2.45rem,5.4vw,4.7rem); line-height:1.05; font-weight:500; }
         .sa-word{ display:inline-block; overflow:hidden; vertical-align:top; padding:0 .04em .12em; margin-right:.22em; }
         .sa-word > span{ display:inline-block; transform:translateY(112%); animation:saWordUp 1.3s cubic-bezier(.16,.84,.24,1) forwards; }
-        .sa-hero-row{ display:grid; grid-template-columns:1.15fr .85fr; gap:64px; align-items:end; margin-top:44px; opacity:0; animation:saFade 1.4s ease 1.7s forwards; }
-        .sa-lead{ max-width:52ch; font-size:1.08rem; line-height:1.85; color:var(--sa-mist); }
+        .sa-hero-row{ display:grid; grid-template-columns:minmax(0,1.28fr) minmax(260px,.72fr); gap:56px; align-items:end; margin-top:34px; opacity:0; animation:saFade 1.4s ease 1.7s forwards; }
+        .sa-lead{ max-width:76ch; display:grid; gap:13px; color:var(--sa-mist); }
+        .sa-lead p{ font-size:clamp(.94rem,1vw,1.03rem); line-height:1.72; text-wrap:pretty; }
+        .sa-lead p:first-child{ color:rgba(243,235,219,.9); font-size:clamp(1rem,1.12vw,1.12rem); font-weight:500; }
+        .sa-approach-line{ display:inline-flex; width:fit-content; max-width:100%; margin-top:4px; padding:10px 14px; border:1px solid rgba(217,165,75,.34); background:rgba(217,165,75,.09); color:var(--sa-cream); font-size:.9rem !important; line-height:1.45 !important; font-weight:600; letter-spacing:.01em; }
         .sa-hero-row .sa-actions{ justify-content:flex-end; }
 
-        .sa-wide{ margin-top:72px; clip-path:inset(0 50% 0 50%); animation:saAperture 1.9s cubic-bezier(.77,0,.18,1) 1.5s forwards; }
+        .sa-wide{ margin-top:58px; clip-path:inset(0 50% 0 50%); animation:saAperture 1.9s cubic-bezier(.77,0,.18,1) 1.5s forwards; }
         .sa-photo--wide{ aspect-ratio:21/9; border:1px solid var(--sa-line); box-shadow:0 50px 90px -40px rgba(0,0,0,.85); }
         .sa-streak{ position:absolute; left:0; right:0; top:50%; height:2px; z-index:2; pointer-events:none; transform:scaleX(0);
           background:linear-gradient(90deg,transparent,rgba(255,236,196,.95),transparent); box-shadow:0 0 22px 4px rgba(217,165,75,.5); animation:saStreak 2.6s cubic-bezier(.5,0,.2,1) 2.7s forwards; }
@@ -1363,6 +1376,8 @@ function AboutPage({ page }) {
           .sa-hero{ padding-top:84px; }
           .sa-hero-row{ grid-template-columns:1fr; gap:30px; }
           .sa-hero-row .sa-actions{ justify-content:flex-start; }
+          .sa-lead{ max-width:none; gap:12px; }
+          .sa-approach-line{ width:100%; }
           .sa-photo--wide{ aspect-ratio:4/3; }
           .sa-wide{ margin-top:52px; }
           .sa-who{ padding-top:120px; padding-bottom:110px; }
