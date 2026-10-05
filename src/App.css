@@ -4,6 +4,10 @@
   margin: auto;
 }
 
+.sa-statement.ahwho-cw span span{
+  color: #fff!important;
+}
+
 .btn {
   border: none;
   display: inline-flex;

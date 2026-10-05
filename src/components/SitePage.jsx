@@ -19,11 +19,9 @@ const pages = {
     title: "Building Pathways to Inclusive and Sustainable Development",
     text: `Social Initiative for India Foundation (SIFI Foundation) is a Section 8 not-for-profit organisation committed to advancing inclusive, sustainable and community-led development. The Foundation brings together field-level implementation, professional programme management, research, partnerships and community participation to address development challenges and create lasting opportunities for underserved and vulnerable communities.Our work spans healthcare and public health, education and digital learning, skill development, livelihoods, women and youth empowerment, agriculture, environmental sustainability, water and sanitation, community development, research and social impact assessment.
 
-The Foundation brings together field-level implementation, professional programme management, research, partnerships and community participation to address development challenges and create lasting opportunities for underserved and vulnerable communities.
-Our work spans healthcare and public health, education and digital learning, skill development, livelihoods, women and youth empowerment, agriculture, environmental sustainability, water and sanitation, community development, research and social impact assessment.
-We believe that sustainable development begins with understanding communities, listening to their needs and working with them to create practical and measurable solutions.
-Our approach is simple:
-Understand → Plan → Partner → Implement → Measure → Learn → Scale
+    The Foundation brings together field-level implementation, professional programme management, research, partnerships and community participation to address development challenges and create lasting opportunities for underserved and vulnerable communities.
+    
+    
 `,
     cards: [
       [
@@ -507,7 +505,7 @@ function NewPage({ page }) {
 const ABOUT_IMAGES = {
   hero: "/images/About.png",
   community: "/images/about1.png",
-  work: "/images/about2.png",
+  work: "/images/about7.png",
   belief: "/images/about3.png",
   fallback: "/images/cover.png",
 };
@@ -885,16 +883,14 @@ function AboutPage({ page }) {
             ))}
             {approachLine ? <p className="sa-approach-line">{approachLine}</p> : null}
           </div>
-          <div className="sa-actions">
-            <a className="sa-btn sa-btn--solid" href="/donate"><span>Support our work</span></a>
-            <a className="sa-btn sa-btn--ghost" href="/reach"><span>Get in touch</span></a>
-          </div>
-        </div>
-
-        <div className="sa-wide">
-          <div className="sa-photo sa-photo--wide">
-            <SafeImage className="sa-par" data-speed=".08" src={ABOUT_IMAGES.hero} alt="SIFI Foundation working alongside communities" />
-            <span className="sa-streak" aria-hidden="true" />
+          <div className="sa-hero-side">
+            <div className="sa-photo sa-photo--hero-side">
+              <SafeImage className="sa-par" data-speed=".08" src="/images/about4.png" alt="SIFI Foundation community development work" />
+            </div>
+            <div className="sa-actions">
+              <a className="sa-btn sa-btn--solid" href="/donate"><span>Support our work</span></a>
+              <a className="sa-btn sa-btn--ghost" href="/reach"><span>Get in touch</span></a>
+            </div>
           </div>
         </div>
 
@@ -907,6 +903,7 @@ function AboutPage({ page }) {
       </div>
 
       {/* ---------------- I : who we are (scroll se jalte words) ---------------- */}
+      
       <div id="sa-ch1" data-ch="1" className="sa-sec sa-who">
         <div className="sa-who-media" aria-hidden="true">
           <SafeImage className="sa-par" data-speed=".06" src={ABOUT_IMAGES.community} alt="" />
@@ -915,10 +912,10 @@ function AboutPage({ page }) {
           <div className="sa-reveal">
             <Kicker no={ROMAN[0]}>Who we are</Kicker>
           </div>
-          <p className="sa-statement" aria-label={whoWeAreText}>
+          <p className="sa-statement awho-cw" aria-label={whoWeAreText}>
             {statementWords.map((w, i) => (
               <span key={`${w}-${i}`}>
-                <span className="sa-w" aria-hidden="true">{w}</span>{" "}
+                <span className="">{w}</span>{" "}
               </span>
             ))}
           </p>
@@ -933,7 +930,7 @@ function AboutPage({ page }) {
       {/* ---------------- II : our work ---------------- */}
       <div id="sa-ch2" data-ch="2" className="sa-sec sa-work">
         <div className="sa-work-grid">
-          <div className="sa-photo sa-photo--tall sa-reveal sa-reveal--clip">
+          <div className="sa-photo sa-photo--tall sa-photo--work sa-reveal sa-reveal--clip">
             <SafeImage className="sa-par" data-speed=".07" src={ABOUT_IMAGES.work} alt="SIFI Foundation community-led programmes" />
             <div className="sa-work-caption">
               <b>18</b>
@@ -942,8 +939,9 @@ function AboutPage({ page }) {
           </div>
           <div className="sa-work-copy sa-reveal" style={{ "--d": ".2s" }}>
             <Kicker no={ROMAN[1]}>Our work</Kicker>
+
             <h2>Working with communities to create lasting opportunity</h2>
-            <p>{workText}</p>
+            <p>Our work spans healthcare and public health, education and digital learning, skill development, livelihoods, women and youth empowerment, agriculture, environmental sustainability, water and sanitation, community development, research and social impact assessment.</p>
             <div className="sa-work-principles" aria-label="Our working principles">
               <span>Listen</span><i aria-hidden="true" />
               <span>Co-create</span><i aria-hidden="true" />
@@ -1208,17 +1206,14 @@ function AboutPage({ page }) {
         .sa-hero-title{ max-width:15em; font-size:clamp(2.45rem,5.4vw,4.7rem); line-height:1.05; font-weight:500; }
         .sa-word{ display:inline-block; overflow:hidden; vertical-align:top; padding:0 .04em .12em; margin-right:.22em; }
         .sa-word > span{ display:inline-block; transform:translateY(112%); animation:saWordUp 1.3s cubic-bezier(.16,.84,.24,1) forwards; }
-        .sa-hero-row{ display:grid; grid-template-columns:minmax(0,1.28fr) minmax(260px,.72fr); gap:56px; align-items:end; margin-top:34px; opacity:0; animation:saFade 1.4s ease 1.7s forwards; }
+        .sa-hero-row{ display:grid; grid-template-columns:minmax(0,1.18fr) minmax(280px,.82fr); gap:56px; align-items:center; margin-top:34px; opacity:0; animation:saFade 1.4s ease 1.7s forwards; }
         .sa-lead{ max-width:76ch; display:grid; gap:13px; color:var(--sa-mist); }
         .sa-lead p{ font-size:clamp(.94rem,1vw,1.03rem); line-height:1.72; text-wrap:pretty; }
         .sa-lead p:first-child{ color:rgba(243,235,219,.9); font-size:clamp(1rem,1.12vw,1.12rem); font-weight:500; }
         .sa-approach-line{ display:inline-flex; width:fit-content; max-width:100%; margin-top:4px; padding:10px 14px; border:1px solid rgba(217,165,75,.34); background:rgba(217,165,75,.09); color:var(--sa-cream); font-size:.9rem !important; line-height:1.45 !important; font-weight:600; letter-spacing:.01em; }
-        .sa-hero-row .sa-actions{ justify-content:flex-end; }
-
-        .sa-wide{ margin-top:58px; clip-path:inset(0 50% 0 50%); animation:saAperture 1.9s cubic-bezier(.77,0,.18,1) 1.5s forwards; }
-        .sa-photo--wide{ aspect-ratio:21/9; border:1px solid var(--sa-line); box-shadow:0 50px 90px -40px rgba(0,0,0,.85); }
-        .sa-streak{ position:absolute; left:0; right:0; top:50%; height:2px; z-index:2; pointer-events:none; transform:scaleX(0);
-          background:linear-gradient(90deg,transparent,rgba(255,236,196,.95),transparent); box-shadow:0 0 22px 4px rgba(217,165,75,.5); animation:saStreak 2.6s cubic-bezier(.5,0,.2,1) 2.7s forwards; }
+        .sa-hero-side{ display:grid; gap:24px; }
+        .sa-hero-side .sa-actions{ justify-content:flex-start; }
+        .sa-photo--hero-side{ aspect-ratio:4/3; border:1px solid var(--sa-line); box-shadow:0 50px 90px -40px rgba(0,0,0,.85); }
         .sa-meta{ display:flex; align-items:center; gap:18px; margin-top:22px; font-size:.86rem; color:rgba(243,235,219,.68); opacity:0; animation:saFade 1.2s ease 3s forwards; }
         .sa-meta > i{ width:1px; height:14px; background:var(--sa-line); }
         .sa-scrollcue{ margin-left:auto; display:flex; align-items:center; gap:12px; font-weight:400; }
@@ -1241,8 +1236,12 @@ function AboutPage({ page }) {
 
         /* ===== II : our work ===== */
         .sa-work{ padding-bottom:170px; }
-        .sa-work-grid{ display:grid; grid-template-columns:5fr 6fr; gap:clamp(48px,8vw,120px); align-items:center; }
+        .sa-work-grid{ display:grid; grid-template-columns:6fr 5fr; gap:clamp(48px,8vw,120px); align-items:center; }
+        .sa-work-copy{ order:1; }
         .sa-photo--tall{ aspect-ratio:4/5; border:1px solid var(--sa-line); box-shadow:0 50px 90px -40px rgba(0,0,0,.85); }
+        .sa-photo--work{ order:2; aspect-ratio:3/2; background:var(--sa-cream); }
+        .sa-photo--work img{ top:0; width:100%; height:100%; object-fit:contain; filter:none; animation:none; }
+        .sa-photo--work::after{ display:none; }
         .sa-photo--tall::after{ content:""; position:absolute; inset:0; z-index:1; background:linear-gradient(180deg,transparent 48%,rgba(7,17,14,.88) 100%); }
         .sa-work-caption{ position:absolute; z-index:3; left:28px; right:28px; bottom:25px; display:flex; align-items:flex-end; gap:14px; border-top:1px solid rgba(243,235,219,.35); padding-top:16px; }
         .sa-work-caption b{ color:var(--sa-brass); font:500 clamp(2.3rem,4vw,4rem)/.8 "Fraunces",serif; }
@@ -1377,7 +1376,6 @@ function AboutPage({ page }) {
           .sa-sec{ padding:0 22px; }
           .sa-hero{ padding-top:84px; }
           .sa-hero-row{ grid-template-columns:1fr; gap:30px; }
-          .sa-hero-row .sa-actions{ justify-content:flex-start; }
           .sa-lead{ max-width:none; gap:12px; }
           .sa-approach-line{ width:100%; }
           .sa-photo--wide{ aspect-ratio:4/3; }
