@@ -40,13 +40,53 @@ function LoginPage() {
         <img src="/images/SIFI%20Foundation%20logo.png" alt="SIFI Foundation" />
         <h2>{mode === "login" ? "Login" : "Create donor account"}</h2>
         {mode === "register" && <label><span>Name</span><input name="name" value={form.name} onChange={update} required /></label>}
-        <label><span>Email</span><div className="input-icon"><Mail size={17} /><input name="email" type="email" value={form.email} onChange={update} required /></div></label>
+        <label>
+          <span>Email or Username</span>
+          <div className="input-icon">
+            <Mail size={17} />
+            <input
+              name="email"
+              type="text"
+              placeholder="e.g. admin or admin@sififoundation.org"
+              value={form.email}
+              onChange={update}
+              required
+            />
+          </div>
+        </label>
         {mode === "register" && <label><span>Phone</span><input name="phone" value={form.phone} onChange={update} /></label>}
-        <label><span>Password</span><div className="input-icon"><LockKeyhole size={17} /><input name="password" type={showPassword ? "text" : "password"} value={form.password} onChange={update} required minLength={6} /><button type="button" onClick={() => setShowPassword((value) => !value)} aria-label="Toggle password visibility">{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div></label>
-        {mode === "login" && <div className="auth-row"><label className="remember"><input name="remember" type="checkbox" checked={form.remember} onChange={update} />Remember me</label><a href="/forgot-password">Forgot password?</a></div>}
-        <button className="btn btn-primary auth-submit" type="submit" disabled={busy}>{busy ? "Please wait..." : mode === "login" ? "Login to Dashboard" : "Register"} </button>
+        <label>
+          <span>Password</span>
+          <div className="input-icon">
+            <LockKeyhole size={17} />
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={form.password}
+              onChange={update}
+              required
+              minLength={4}
+            />
+            <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label="Toggle password visibility">
+              {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+            </button>
+          </div>
+        </label>
+        {mode === "login" && (
+          <div className="auth-row">
+            <label className="remember">
+              <input name="remember" type="checkbox" checked={form.remember} onChange={update} />Remember me
+            </label>
+            <a href="/forgot-password">Forgot password?</a>
+          </div>
+        )}
+        <button className="btn btn-primary auth-submit" type="submit" disabled={busy}>
+          {busy ? "Please wait..." : mode === "login" ? "Login to Dashboard" : "Register"}
+        </button>
         {message && <p className="form-message error">{message}</p>}
-        <button className="auth-switch" type="button" onClick={() => setMode(mode === "login" ? "register" : "login")}><UserPlus size={16} />{mode === "login" ? "Need a donor account?" : "Already registered?"}</button>
+        <button className="auth-switch" type="button" onClick={() => setMode(mode === "login" ? "register" : "login")}>
+          <UserPlus size={16} />{mode === "login" ? "Need a donor account?" : "Already registered?"}
+        </button>
       </form>
     </section>
   );

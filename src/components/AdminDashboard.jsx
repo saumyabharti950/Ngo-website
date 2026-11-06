@@ -3,7 +3,7 @@ import ContentEditor from "./ContentEditor";
 import PageSliderEditor from "./PageSliderEditor";
 import { useEffect, useMemo, useState } from "react";
 import {
-  BarChart3, BriefcaseBusiness, ChevronDown, Eye, FileText, GalleryHorizontal, HandHeart, LayoutDashboard,
+  BarChart3, BriefcaseBusiness, ChevronDown, Download, Eye, FileText, GalleryHorizontal, HandHeart, LayoutDashboard,
   LogOut, Megaphone, MessageSquare, Pencil, Plus, Settings, ShieldCheck, Trash2, UserRound, UsersRound
 } from "lucide-react";
 import { api } from "../lib/api";
@@ -279,15 +279,291 @@ function ContactMessages({ rows, reload }) {
 }
 
 function DonationTable({ title, rows }) {
-  return <DataTable title={title} rows={rows} columns={[
-    { key: "donationNumber", label: "Donation No." },
-    { key: "donorName", label: "Donor" },
-    { key: "email", label: "Email" },
-    { key: "amount", label: "Amount", render: (row) => `${row.currency || "INR"} ${row.amount}` },
-    { key: "gateway", label: "Gateway" },
-    { key: "status", label: "Status" },
-    { key: "createdAt", label: "Date", render: rowDate }
-  ]} />;
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [gatewayFilter, setGatewayFilter] = useState("all");
+  const [selectedDonation, setSelectedDonation] = useState(null);
+  const [downloadingId, setDownloadingId] = useState(null);
+
+  // Summary statistics
+  const capturedRows = rows.filter((r) => r.status === "captured");
+  const totalAmount = capturedRows.reduce((sum, r) => sum + Number(r.amount || 0), 0);
+  const avgAmount = capturedRows.length > 0 ? Math.round(totalAmount / capturedRows.length) : 0;
+  const pendingCount = rows.filter((r) => r.status === "pending" || r.status === "created").length;
+
+  const filtered = rows.filter((row) => {
+    if (statusFilter !== "all" && row.status !== statusFilter) return false;
+    if (gatewayFilter !== "all" && row.gateway !== gatewayFilter) return false;
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return (
+      (row.donationNumber && String(row.donationNumber).toLowerCase().includes(q)) ||
+      (row.donorName && String(row.donorName).toLowerCase().includes(q)) ||
+      (row.email && String(row.email).toLowerCase().includes(q)) ||
+      (row.phone && String(row.phone).includes(q)) ||
+      (row.panNumber && String(row.panNumber).toLowerCase().includes(q)) ||
+      (row.gatewayOrderId && String(row.gatewayOrderId).toLowerCase().includes(q)) ||
+      (row.receiptNumber && String(row.receiptNumber).toLowerCase().includes(q))
+    );
+  });
+
+  const downloadReceipt = async (donation) => {
+    try {
+      setDownloadingId(donation.id);
+      const identifier = donation.donationNumber || donation.id;
+      const response = await api(`/donations/${identifier}/invoice`, { raw: true });
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `donation-${donation.donationNumber || donation.id}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Failed to download invoice: " + err.message);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  return (
+    <section className="admin-card donation-admin-card">
+      {/* Top Overview KPI Cards */}
+      <div className="donation-stats-strip">
+        <div className="donation-stat-box">
+          <span className="stat-label">Total Amount Raised</span>
+          <strong className="stat-value text-success">₹{totalAmount.toLocaleString("en-IN")}</strong>
+          <small>{capturedRows.length} successful donations</small>
+        </div>
+        <div className="donation-stat-box">
+          <span className="stat-label">Successful Donations</span>
+          <strong className="stat-value">{capturedRows.length}</strong>
+          <small>Verified payments</small>
+        </div>
+        <div className="donation-stat-box">
+          <span className="stat-label">Pending / Created</span>
+          <strong className="stat-value text-warning">{pendingCount}</strong>
+          <small>Awaiting confirmation</small>
+        </div>
+        <div className="donation-stat-box">
+          <span className="stat-label">Average Contribution</span>
+          <strong className="stat-value">₹{avgAmount.toLocaleString("en-IN")}</strong>
+          <small>Per successful donation</small>
+        </div>
+      </div>
+
+      <div className="table-head">
+        <h2>{title}</h2>
+        <div className="table-tools donation-tools">
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="table-filter-select">
+            <option value="all">All Statuses</option>
+            <option value="captured">Captured (Paid)</option>
+            <option value="pending">Pending</option>
+            <option value="failed">Failed</option>
+          </select>
+
+          <select value={gatewayFilter} onChange={(e) => setGatewayFilter(e.target.value)} className="table-filter-select">
+            <option value="all">All Gateways</option>
+            <option value="cashfree">Cashfree</option>
+            <option value="razorpay">Razorpay</option>
+            <option value="stripe">Stripe</option>
+          </select>
+
+          <input
+            placeholder="Search donor, email, phone, ref..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Donation No.</th>
+              <th>Donor</th>
+              <th>Contact</th>
+              <th>Amount</th>
+              <th>Gateway</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length ? (
+              filtered.map((row) => (
+                <tr key={row.id}>
+                  <td>
+                    <strong>{row.donationNumber || row.receiptNumber || `SIFI-${row.id}`}</strong>
+                  </td>
+                  <td>
+                    <div>
+                      <strong>{row.donorName || row.User?.name || "Guest Donor"}</strong>
+                      {row.anonymousDonation && <span className="badge-anon">Anon</span>}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="donor-contact-cell">
+                      <span>{row.email || row.User?.email || "-"}</span>
+                      {row.phone && <small>{row.phone}</small>}
+                    </div>
+                  </td>
+                  <td>
+                    <strong className="amount-cell">₹{Number(row.amount).toLocaleString("en-IN")}</strong>
+                  </td>
+                  <td>
+                    <span className="gateway-badge text-capitalize">{row.gateway || "-"}</span>
+                  </td>
+                  <td>
+                    <span className={`status-pill status-${row.status}`}>
+                      {row.status === "captured" ? "Paid" : row.status}
+                    </span>
+                  </td>
+                  <td>{rowDate(row)}</td>
+                  <td>
+                    <div className="row-actions">
+                      <button
+                        type="button"
+                        className="table-action"
+                        onClick={() => setSelectedDonation(row)}
+                        title="View Full Details"
+                      >
+                        <Eye size={14} /> Details
+                      </button>
+                      <button
+                        type="button"
+                        className="table-action download-action"
+                        onClick={() => downloadReceipt(row)}
+                        disabled={downloadingId === row.id}
+                        title="Download 80G Receipt"
+                      >
+                        <Download size={14} /> {downloadingId === row.id ? "..." : "Receipt"}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={8}>No matching donation records found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* View Donation Details Modal */}
+      {selectedDonation && (
+        <div className="crud-overlay" role="dialog" aria-modal="true">
+          <div className="crud-modal donation-details-modal">
+            <div className="crud-head">
+              <h2>Donation Record Details</h2>
+              <button type="button" onClick={() => setSelectedDonation(null)} aria-label="Close dialog">
+                ×
+              </button>
+            </div>
+
+            <div className="donation-detail-body">
+              <div className="modal-status-banner">
+                <div>
+                  <span className="modal-label">Donation Reference No:</span>
+                  <strong>{selectedDonation.donationNumber || selectedDonation.receiptNumber || `SIFI-${selectedDonation.id}`}</strong>
+                </div>
+                <span className={`status-pill status-${selectedDonation.status}`}>
+                  {selectedDonation.status === "captured" ? "Payment Successful" : selectedDonation.status}
+                </span>
+              </div>
+
+              <div className="modal-section">
+                <h4>Donor Information</h4>
+                <div className="detail-grid">
+                  <div>
+                    <label>Donor Name:</label>
+                    <p>{selectedDonation.donorName || selectedDonation.User?.name || "Anonymous"}</p>
+                  </div>
+                  <div>
+                    <label>Email Address:</label>
+                    <p>{selectedDonation.email || selectedDonation.User?.email || "-"}</p>
+                  </div>
+                  <div>
+                    <label>Mobile Number:</label>
+                    <p>{selectedDonation.phone || "-"}</p>
+                  </div>
+                  <div>
+                    <label>PAN Number (80G Tax Exemption):</label>
+                    <p className="font-mono font-bold">{selectedDonation.panNumber || "Not Provided"}</p>
+                  </div>
+                  <div className="span-full">
+                    <label>Address:</label>
+                    <p>
+                      {[
+                        selectedDonation.address,
+                        selectedDonation.city,
+                        selectedDonation.state,
+                        selectedDonation.country,
+                        selectedDonation.pincode
+                      ]
+                        .filter(Boolean)
+                        .join(", ") || "No address provided"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-section">
+                <h4>Payment & Gateway Information</h4>
+                <div className="detail-grid">
+                  <div>
+                    <label>Amount:</label>
+                    <p className="amount-highlight">₹{Number(selectedDonation.amount).toLocaleString("en-IN")}</p>
+                  </div>
+                  <div>
+                    <label>Payment Gateway:</label>
+                    <p className="text-capitalize">{selectedDonation.gateway || "-"}</p>
+                  </div>
+                  <div>
+                    <label>Gateway Order ID:</label>
+                    <p className="font-mono">{selectedDonation.gatewayOrderId || selectedDonation.razorpayOrderId || "-"}</p>
+                  </div>
+                  <div>
+                    <label>Gateway Payment ID:</label>
+                    <p className="font-mono">{selectedDonation.gatewayPaymentId || selectedDonation.razorpayPaymentId || "-"}</p>
+                  </div>
+                  <div>
+                    <label>Payment Method:</label>
+                    <p className="text-capitalize">{selectedDonation.paymentMethod || "Online"}</p>
+                  </div>
+                  <div>
+                    <label>Payment Date:</label>
+                    <p>{selectedDonation.paidAt ? new Date(selectedDonation.paidAt).toLocaleString("en-IN") : rowDate(selectedDonation)}</p>
+                  </div>
+                  <div className="span-full">
+                    <label>Purpose / Message:</label>
+                    <p>{selectedDonation.message || "General Healthcare Support"}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="crud-actions">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => downloadReceipt(selectedDonation)}
+              >
+                <Download size={16} /> Download 80G Receipt
+              </button>
+              <button type="button" onClick={() => setSelectedDonation(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
 }
 
 function CareerCrud({ rows, can, setModal, reload }) {

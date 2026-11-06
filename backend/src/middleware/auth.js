@@ -32,6 +32,32 @@ export const authenticate = async (req, _res, next) => {
   }
 };
 
+export const optionalAuth = async (req, _res, next) => {
+  try {
+    const header = req.headers.authorization || "";
+    const token = header.startsWith("Bearer ") ? header.slice(7) : null;
+    if (!token) {
+      req.user = null;
+      req.permissions = [];
+      return next();
+    }
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findByPk(payload.sub, { include: [Role] });
+    if (user && user.status === "active") {
+      req.user = user;
+      req.permissions = await resolvePermissions(user);
+    } else {
+      req.user = null;
+      req.permissions = [];
+    }
+    next();
+  } catch {
+    req.user = null;
+    req.permissions = [];
+    next();
+  }
+};
+
 export const authorize = (...permissions) => (req, _res, next) => {
   if (!permissions.length) return next();
   if (req.user?.Role?.slug === "super-admin") return next();

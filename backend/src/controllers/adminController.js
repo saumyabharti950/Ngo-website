@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { Op } from "sequelize";
-import { AuditLog, Permission, Role, User } from "../models/index.js";
+import { AuditLog, Permission, Role, User, Donation } from "../models/index.js";
 import { asyncHandler, ok, ApiError } from "../utils/response.js";
 import { makeSlug } from "../utils/slug.js";
 
@@ -24,13 +24,24 @@ const audit = (req, action, module, record, oldValues = null) => AuditLog.create
 });
 
 export const dashboard = asyncHandler(async (_req, res) => {
-  const [totalUsers, activeUsers, roles, permissions] = await Promise.all([
+  const [totalUsers, activeUsers, roles, permissions, totalDonations, successfulDonations, totalAmount] = await Promise.all([
     User.count(),
     User.count({ where: { status: "active" } }),
     Role.count(),
-    Permission.count()
+    Permission.count(),
+    Donation.count(),
+    Donation.count({ where: { status: "captured" } }),
+    Donation.sum("amount", { where: { status: "captured" } })
   ]);
-  ok(res, { totalUsers, activeUsers, roles, permissions });
+  ok(res, {
+    totalUsers,
+    activeUsers,
+    roles,
+    permissions,
+    totalDonations: totalDonations || 0,
+    successfulDonations: successfulDonations || 0,
+    totalAmount: totalAmount || 0
+  });
 });
 
 export const listUsers = asyncHandler(async (req, res) => {

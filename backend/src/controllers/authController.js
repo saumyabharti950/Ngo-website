@@ -1,13 +1,23 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { body } from "express-validator";
+import { Op } from "sequelize";
 import { Permission, Role, User } from "../models/index.js";
 import { asyncHandler, ok, ApiError } from "../utils/response.js";
 import { signToken, resolvePermissions } from "../middleware/auth.js";
 import { validate } from "../middleware/errorHandler.js";
 
-export const loginRules = [body("email").isEmail(), body("password").isLength({ min: 6 }), validate];
-export const registerRules = [body("name").notEmpty(), body("email").isEmail(), body("password").isLength({ min: 8 }), validate];
+export const loginRules = [
+  body("email").trim().notEmpty().withMessage("Email or username is required"),
+  body("password").notEmpty().withMessage("Password is required"),
+  validate
+];
+export const registerRules = [
+  body("name").notEmpty(),
+  body("email").isEmail(),
+  body("password").isLength({ min: 8 }),
+  validate
+];
 
 const userPayload = async (user) => {
   const fresh = await User.findByPk(user.id, { include: [Role, Permission] });
@@ -29,8 +39,20 @@ export const register = asyncHandler(async (req, res) => {
 });
 
 export const login = asyncHandler(async (req, res) => {
-  const user = await User.scope("withPassword").findOne({ where: { email: req.body.email }, include: [Role] });
-  if (!user || !(await bcrypt.compare(req.body.password, user.password))) throw new ApiError(401, "Invalid email or password");
+  const input = String(req.body.email || "").trim().toLowerCase();
+  const searchConditions = [
+    { email: input },
+    ...(input === "admin" ? [{ email: "admin@sififoundation.org" }, { email: "admin@admin.com" }] : [])
+  ];
+
+  const user = await User.scope("withPassword").findOne({
+    where: { [Op.or]: searchConditions },
+    include: [Role]
+  });
+
+  if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
+    throw new ApiError(401, "Invalid email/username or password");
+  }
   if (user.status !== "active") throw new ApiError(403, "Account is not active");
   user.lastLoginAt = new Date();
   await user.save();

@@ -6,6 +6,7 @@ import Campaigns from "./Campaigns";
 import ContentSections from "./ContentSections";
 import SitePage from "./SitePage";
 import DonationPage from "./DonationPage";
+import ThankYouPage from "./ThankYouPage";
 import LoginPage from "./LoginPage";
 import ContentDetailView from "./ContentDetailView";
 import PageBanner from "./PageBanner";
@@ -33,9 +34,21 @@ export default function PublicWebsite({ path, previewData }) {
     <Navbar preview={preview} path={path} />
     <main>
       {showSlider && <PageBanner key={`${bannerPath}:${previewData?.activeSlide || 0}`} slides={slider.slides} initialIndex={previewData?.activeSlide || 0} preview={preview} />}
-      {previewData?.kind === "content" && previewData.view !== "listing" ? <ContentDetailView item={previewData.item} /> : path === "/" ? <>
-        {!showSlider && <Hero />}<NoticeStrip /><Stats /><Campaigns /><ContentSections />
-      </> : path === "/donate" ? <DonationPage /> : path === "/login" ? <LoginPage /> : <SitePage path={path} previewContent={previewData?.kind === "content" ? previewData.item : undefined} />}
+      {previewData?.kind === "content" && previewData.view !== "listing" ? (
+        <ContentDetailView item={previewData.item} />
+      ) : path === "/" ? (
+        <>
+          {!showSlider && <Hero />}<NoticeStrip /><Stats /><Campaigns /><ContentSections />
+        </>
+      ) : path === "/donate" ? (
+        <DonationPage />
+      ) : path === "/thank-you" ? (
+        <ThankYouPage />
+      ) : path === "/login" ? (
+        <LoginPage />
+      ) : (
+        <SitePage path={path} previewContent={previewData?.kind === "content" ? previewData.item : undefined} />
+      )}
     </main>
     <Footer />
     {donationModal && <DonationPage modal onClose={() => setDonationModal(false)} />}
