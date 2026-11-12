@@ -1,5 +1,5 @@
 import { ApiError } from "./response.js";
-import { inferMediaType, validGalleryImageUrl } from "../../../shared/gallery.js";
+import { inferMediaType, validGalleryImageUrl } from "../../shared/gallery.js";
 
 const columns = new Set(["title", "slug", "shortDescription", "description", "content", "category", "tags", "metaTitle", "metaDescription", "featuredImage", "image1", "image2", "image3", "image4", "videoUrl", "documentFile", "status", "featured", "sortOrder"]);
 const extra = new Set(["eventDate", "location", "altText", "beneficiaryCount", "ageGroup", "geographicalArea", "state", "district", "startDate", "endDate", "budget", "fundingRequired", "programmeManager", "contactEmail", "contactPhone", "websiteUrl", "overview", "objectives", "problemStatement", "targetBeneficiaries", "keyActivities", "outcomes", "impactSummary", "programmeStatus", "fundingSource", "implementingPartner", "governmentPartner", "communityPartner", "sdgGoals", "storyDate", "beneficiaryName", "beneficiaryAge", "beneficiaryGender", "background", "challenge", "intervention", "supportProvided", "journey", "result", "impact", "beforeText", "afterText", "quote", "testimonial", "programmeId", "metaKeywords", "tags", "videoUrl"]);

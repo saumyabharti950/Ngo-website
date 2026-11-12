@@ -1,4 +1,7 @@
-require("dotenv").config({ path: ".env.local" });
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env.local") });
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 require("dotenv").config();
 
 module.exports = {
@@ -26,7 +29,7 @@ module.exports = {
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
-    host: process.env.DB_HOST,
+    host: process.env.DB_HOST || "localhost",
     port: Number(process.env.DB_PORT || 3306),
     dialect: "mysql",
     logging: false,

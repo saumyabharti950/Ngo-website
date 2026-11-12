@@ -1,6 +1,6 @@
 import { Setting } from "../models/index.js";
 import { asyncHandler, ok, ApiError } from "../utils/response.js";
-import { bannerPages, validateSlider } from "../../../shared/pageSliders.js";
+import { bannerPages, validateSlider } from "../../shared/pageSliders.js";
 
 export async function readPageSliders() {
   const rows = await Setting.findAll({ where: { group: "page_sliders" } });

@@ -1,6 +1,6 @@
 import { Setting, sequelize } from "../models/index.js";
 import { asyncHandler, ok, ApiError } from "../utils/response.js";
-import { settingFields, groupSettings, urlSetting, safeUrl } from "../../../shared/settings.js";
+import { settingFields, groupSettings, urlSetting, safeUrl } from "../../shared/settings.js";
 
 export const publicSettings = asyncHandler(async (_req, res) => {
   const rows = await Setting.findAll();
